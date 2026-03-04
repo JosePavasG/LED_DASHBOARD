@@ -62,9 +62,22 @@ Cada dispositivo se identifica por su MAC address (`AA-BB-CC-DD-EE-FF`). El dash
 - **LWT (Last Will & Testament):** detección automática de online/offline
 - **Reconexión automática** WiFi y MQTT con watchdog (40s)
 
+## Firmware pre-compilado
+
+En `.bin/firmware.bin` se incluye una imagen binaria lista para flashear en cualquier **Seeed XIAO ESP32S3** sin necesidad de copiar archivos individuales. Contiene el firmware MicroPython completo (v1.0.0) con todos los módulos del proyecto ya integrados.
+
+```bash
+# Flashear con esptool (dirección 0x0, flash completa de 8 MB)
+esptool.py --chip esp32s3 --port COM3 write_flash 0x0 .bin/firmware.bin
+```
+
+> **Nota:** Después de flashear, aún necesitas crear `config.py` con tus credenciales WiFi y MQTT (ver sección Setup → Firmware).
+
 ## Estructura del proyecto
 
 ```
+├── .bin/
+│   └── firmware.bin          # Imagen binaria pre-compilada para XIAO ESP32S3
 ├── firmware/
 │   ├── boot.py                # Boot temprano + FW_VERSION (editar aquí para releases)
 │   ├── main.py                # Firmware principal (WiFi, MQTT, LED, telemetría)
