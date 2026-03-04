@@ -5,8 +5,8 @@ Control remoto de un LED con efectos PWM mediante MQTT, usando un **Seeed Studio
 ## Arquitectura
 
 ```
-┌──────────────┐      MQTT       ┌────────────────┐      MQTT/WS      ┌──────────────┐
-│  XIAO ESP32  │◄──────────────►│   HiveMQ       │◄────────────────►│  Dashboard   │
+┌──────────────┐      MQTT       ┌────────────────┐      MQTT/WS     ┌──────────────┐
+│  XIAO ESP32  │◄──────────────► │   HiveMQ       │◄────────────────►│  Dashboard   │
 │  MicroPython │   broker.hivemq │   (público)    │    WebSocket     │  (browser)   │
 └──────────────┘      :1883      └────────────────┘      :8000       └──────────────┘
 ```
