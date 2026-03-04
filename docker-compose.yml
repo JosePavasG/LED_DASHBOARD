@@ -1,0 +1,33 @@
+services:
+
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: led-mqtt-broker
+    restart: unless-stopped
+    volumes:
+      - ./mosquitto/config/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/log:/mosquitto/log
+    ports:
+      - "1883:1883"       # MQTT — firmware ESP32
+      - "9001:9001"       # WebSocket — dashboard web
+    networks:
+      - led-net
+
+  dashboard:
+    image: nginx:alpine
+    container_name: led-dashboard
+    restart: unless-stopped
+    volumes:
+      - ./web:/usr/share/nginx/html:ro
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "80:80"           # Dashboard web
+    depends_on:
+      - mosquitto
+    networks:
+      - led-net
+
+networks:
+  led-net:
+    driver: bridge

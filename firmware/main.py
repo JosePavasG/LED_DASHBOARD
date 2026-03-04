@@ -10,6 +10,8 @@ import network
 import time
 import gc
 import json
+import os
+import esp32
 
 try:
     from umqtt.simple import MQTTClient
@@ -26,7 +28,6 @@ _pwm = PWM(Pin(config.LED_PIN), freq=config.PWM_FREQ, duty=0)
 _brightness = 100  # 0-100
 _led_on = False
 _current_effect = "none"
-_effect_step = 0
 _effect_last_ms = 0
 
 
@@ -72,9 +73,8 @@ def set_brightness(val):
 
 
 def start_effect(name):
-    global _current_effect, _effect_step, _effect_last_ms, _led_on
+    global _current_effect, _effect_last_ms, _led_on
     _current_effect = name
-    _effect_step = 0
     _effect_last_ms = time.ticks_ms()
     _led_on = True
 
@@ -83,7 +83,6 @@ def start_effect(name):
 # Efectos no-bloqueantes
 # ---------------------------------------------------------------
 def _tick_breathe(now):
-    global _effect_step, _effect_last_ms
     period = config.BREATHE_PERIOD_MS
     elapsed = time.ticks_diff(now, _effect_last_ms)
     # Posicion en el ciclo 0..period
@@ -97,7 +96,6 @@ def _tick_breathe(now):
 
 
 def _tick_blink(now):
-    global _effect_step, _effect_last_ms
     elapsed = time.ticks_diff(now, _effect_last_ms)
     half = config.BLINK_PERIOD_MS // 2
     if (elapsed // half) % 2 == 0:
@@ -107,7 +105,6 @@ def _tick_blink(now):
 
 
 def _tick_strobe(now):
-    global _effect_step, _effect_last_ms
     elapsed = time.ticks_diff(now, _effect_last_ms)
     half = config.STROBE_PERIOD_MS // 2
     if (elapsed // half) % 2 == 0:
@@ -126,7 +123,7 @@ _SOS_PATTERN = [
 
 
 def _tick_sos(now):
-    global _effect_step, _effect_last_ms
+    global _effect_last_ms
     unit = config.SOS_UNIT_MS
     elapsed = time.ticks_diff(now, _effect_last_ms)
     # Calcular el paso actual en el patron
@@ -277,13 +274,24 @@ def mqtt_publish_status():
             print("[MQTT] Error publicando status: {}".format(e))
 
 
+def _read_temp():
+    try:
+        return esp32.mcu_temperature()
+    except Exception:
+        return 0
+
+
 def mqtt_publish_telemetry():
     if client:
         rssi = wlan.status("rssi") if wlan.isconnected() else 0
+        fs = os.statvfs('/')
         data = json.dumps({
             "rssi": rssi,
             "uptime": time.time(),
             "free_ram": gc.mem_free(),
+            "fs_free": fs[0] * fs[3],
+            "fs_total": fs[0] * fs[2],
+            "temp_c": _read_temp(),
             "ip": wlan.ifconfig()[0] if wlan.isconnected() else "0.0.0.0",
         })
         try:
@@ -421,7 +429,7 @@ def main():
             try:
                 client.publish(config.MQTT_TOPIC_ONLINE, b"offline", retain=True)
                 client.disconnect()
-            except:
+            except Exception:
                 pass
             break
 

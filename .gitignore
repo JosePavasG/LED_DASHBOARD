@@ -1,5 +1,8 @@
 .claude/
 *.md
 !README.md
-*.conf
 pymakr.conf
+
+# Docker - volumenes de Mosquitto
+mosquitto/data/
+mosquitto/log/

@@ -1,497 +1,987 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>XIAO LED Effects Dashboard</title>
+<title>Control Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
+
+[data-theme="dark"]{
+  --bg:#0a0b10;--surface:#12141c;--surface-alt:#1a1d28;--border:#1f2233;
+  --text:#e8ebf0;--text-secondary:#7a7f96;
+  --accent:#6366f1;--accent-hover:#818cf8;--accent-glow:rgba(99,102,241,.15);
+  --green:#34d399;--red:#f87171;--orange:#fbbf24;--cyan:#22d3ee;
+  --slider-track:#1a1d28;--slider-fill-start:#4f46e5;--slider-fill-end:#6366f1;
+  --log-bg:#0a0b10;
+  --scrollbar-thumb:rgba(255,255,255,.08);--scrollbar-thumb-hover:rgba(255,255,255,.15);
+  --nav-hover:rgba(99,102,241,.08);
+  --gauge-track:rgba(255,255,255,.06);
+}
+[data-theme="light"]{
+  --bg:#f8f9fc;--surface:#ffffff;--surface-alt:#f1f3f9;--border:#e0e3eb;
+  --text:#0f1729;--text-secondary:#64698a;
+  --accent:#6366f1;--accent-hover:#818cf8;--accent-glow:rgba(99,102,241,.1);
+  --green:#34d399;--red:#f87171;--orange:#fbbf24;--cyan:#22d3ee;
+  --slider-track:#e0e3eb;--slider-fill-start:#4f46e5;--slider-fill-end:#6366f1;
+  --log-bg:#f8f9fc;
+  --scrollbar-thumb:rgba(0,0,0,.1);--scrollbar-thumb-hover:rgba(0,0,0,.18);
+  --nav-hover:rgba(99,102,241,.06);
+  --gauge-track:rgba(0,0,0,.06);
+}
+
 body{
-  font-family:'Segoe UI',system-ui,sans-serif;
-  background:#0a0a1a;
-  color:#e0e0e0;
-  min-height:100vh;
-}
-.app{
-  max-width:520px;
-  margin:0 auto;
-  padding:24px 16px 40px;
+  font-family:'Inter',system-ui,-apple-system,sans-serif;
+  background:var(--bg);color:var(--text);
+  min-height:100vh;display:flex;
+  transition:background .3s,color .3s;
+  overflow-x:hidden;
 }
 
-/* Header */
-.header{text-align:center;margin-bottom:24px}
-.header h1{font-size:1.5em;color:#00e5ff;letter-spacing:1px}
-.header .sub{color:#556;font-size:.82em;margin-top:2px}
+/* ===== Sidebar ===== */
+.sidebar{
+  width:250px;min-height:100vh;
+  background:var(--surface);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  padding:14px 10px;
+  position:fixed;left:0;top:0;bottom:0;z-index:200;
+  transition:width .3s ease,background .3s;
+  overflow:hidden;
+}
+.sidebar.collapsed{width:56px}
 
-/* Online badge */
-.badge-row{display:flex;justify-content:center;gap:12px;margin-bottom:20px;align-items:center}
+/* Brand row: icon + text + toggle */
+.sidebar-brand{
+  display:flex;align-items:center;gap:10px;
+  padding:0 4px;margin-bottom:14px;
+  min-height:36px;
+}
+.sidebar-brand .brand-icon{color:var(--accent);flex-shrink:0;transition:opacity .2s,width .3s;overflow:hidden}
+.sidebar.collapsed .brand-icon{display:none}
+.sidebar-brand .brand-text{
+  flex:1;overflow:hidden;white-space:nowrap;
+  transition:opacity .2s,width .3s;
+}
+.sidebar.collapsed .brand-text{display:none}
+.sidebar-brand h1{font-size:.85rem;font-weight:700;letter-spacing:.4px;color:var(--text)}
+.sidebar-brand span{display:block;font-size:.6rem;color:var(--text-secondary);font-weight:500;margin-top:1px}
+.sidebar-toggle{
+  display:flex;align-items:center;justify-content:center;
+  width:32px;height:32px;border-radius:6px;
+  border:1px solid var(--border);background:var(--surface-alt);
+  color:var(--text-secondary);cursor:pointer;flex-shrink:0;
+  margin-left:auto;transition:all .2s;
+}
+.sidebar.collapsed .sidebar-brand{padding:0 3px;gap:0}
+.sidebar.collapsed .sidebar-toggle{margin:0}
+.sidebar-toggle:hover{color:var(--text);border-color:var(--accent)}
+.sidebar-toggle svg{transition:transform .3s}
+.sidebar.collapsed .sidebar-toggle svg{transform:rotate(180deg)}
+
+/* Connection badges */
+.sidebar-section{margin-bottom:10px}
+.sidebar-section-label{
+  font-size:.6rem;font-weight:600;color:var(--text-secondary);
+  text-transform:uppercase;letter-spacing:1px;
+  margin-bottom:6px;padding:0 8px;
+  white-space:nowrap;overflow:hidden;transition:all .2s;
+}
+.sidebar.collapsed .sidebar-section-label{opacity:0;height:0;margin:0}
+.status-badges{display:flex;flex-direction:row;gap:5px;padding:0 4px}
 .badge{
-  display:inline-flex;align-items:center;gap:6px;
-  padding:4px 14px;border-radius:20px;font-size:.78em;font-weight:600;
-  letter-spacing:.5px;text-transform:uppercase;
+  display:flex;align-items:center;gap:6px;
+  padding:6px 8px;border-radius:6px;
+  font-size:.68rem;font-weight:600;
+  background:var(--surface-alt);border:1px solid var(--border);
+  transition:all .3s;white-space:nowrap;overflow:hidden;flex:1;
 }
-.badge .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.badge.online{background:rgba(0,200,83,.12);color:#00c853;border:1px solid rgba(0,200,83,.3)}
-.badge.online .dot{background:#00c853;box-shadow:0 0 6px #00c853}
-.badge.offline{background:rgba(244,67,54,.12);color:#f44336;border:1px solid rgba(244,67,54,.3)}
-.badge.offline .dot{background:#f44336;box-shadow:0 0 6px #f44336}
-.badge.broker{background:rgba(33,150,243,.12);color:#42a5f5;border:1px solid rgba(33,150,243,.3)}
-.badge.broker .dot{background:#42a5f5;box-shadow:0 0 6px #42a5f5}
-.badge.broker-off{background:rgba(244,67,54,.12);color:#f44336;border:1px solid rgba(244,67,54,.3)}
-.badge.broker-off .dot{background:#f44336}
+.badge .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;transition:all .3s}
+.badge .badge-label{transition:opacity .15s}
+/* Collapsed: hide entire status section */
+.sidebar.collapsed .sidebar-section{height:0;margin:0;overflow:hidden;opacity:0;transition:all .2s}
+@keyframes dotPulse{
+  0%,100%{opacity:1;box-shadow:0 0 0 0 currentColor}
+  50%{opacity:.7;box-shadow:0 0 0 4px currentColor}
+}
+.badge.online{color:var(--green);border-color:color-mix(in srgb,var(--green) 25%,transparent)}
+.badge.online .dot{background:var(--green);animation:dotPulse 2s ease-in-out infinite}
+.badge.offline{color:var(--red);border-color:color-mix(in srgb,var(--red) 20%,transparent)}
+.badge.offline .dot{background:var(--red)}
+.badge.broker{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 25%,transparent)}
+.badge.broker .dot{background:var(--accent);animation:dotPulse 2s ease-in-out infinite}
+.badge.broker-off{color:var(--red);border-color:color-mix(in srgb,var(--red) 20%,transparent)}
+.badge.broker-off .dot{background:var(--red)}
 
-/* LED circle */
-.led-container{text-align:center;margin-bottom:24px}
-.led-circle{
-  width:150px;height:150px;
-  border-radius:50%;
-  margin:0 auto;
-  display:flex;align-items:center;justify-content:center;flex-direction:column;
-  border:3px solid #222;
-  background:#0f0f1e;
-  transition:border-color .3s,box-shadow .3s,background .3s;
-  position:relative;
+/* Nav */
+.sidebar-nav{display:flex;flex-direction:column;gap:2px;margin-bottom:12px}
+.nav-link{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 10px;border-radius:7px;
+  font-size:.78rem;font-weight:500;color:var(--text-secondary);
+  cursor:pointer;position:relative;overflow:hidden;
+  white-space:nowrap;transition:color .2s;
+  border:none;background:none;text-align:left;width:100%;
 }
-.led-circle .effect-label{font-size:.7em;color:#667;margin-top:4px;text-transform:uppercase;letter-spacing:1px}
-.led-circle .pct{font-size:2em;font-weight:700;line-height:1}
+.nav-link::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;
+  width:0;background:var(--nav-hover);transition:width .25s;border-radius:7px;z-index:0;
+}
+.nav-link:hover::before{width:100%}
+.nav-link:hover{color:var(--text)}
+.nav-link svg,.nav-link .nav-label{position:relative;z-index:1}
+.nav-link svg{flex-shrink:0;width:18px;height:18px}
+.nav-link .nav-label{transition:opacity .2s}
+.sidebar.collapsed .nav-label{opacity:0;width:0;overflow:hidden}
+.nav-link.active{color:var(--accent);background:var(--accent-glow)}
+.nav-link.active::after{
+  content:'';position:absolute;left:0;top:4px;bottom:4px;
+  width:3px;border-radius:0 3px 3px 0;
+  background:linear-gradient(180deg,var(--accent),var(--cyan));
+}
 
-.led-circle.on{
-  border-color:#00e676;
-  background:radial-gradient(circle,rgba(0,230,118,.15) 0%,#0f0f1e 70%);
-  box-shadow:0 0 40px rgba(0,230,118,.25),0 0 80px rgba(0,230,118,.08);
-  color:#00e676;
+/* Footer */
+.sidebar-spacer{flex:1}
+.sidebar-footer{
+  display:flex;flex-direction:column;gap:8px;
+  padding-top:10px;border-top:1px solid var(--border);
 }
-.led-circle.off{border-color:#444;color:#555}
+.theme-toggle{
+  display:flex;align-items:center;gap:8px;
+  padding:7px 10px;border-radius:7px;
+  font-size:.7rem;font-weight:500;color:var(--text-secondary);
+  background:var(--surface-alt);border:1px solid var(--border);
+  cursor:pointer;transition:all .2s;white-space:nowrap;overflow:hidden;
+}
+.theme-toggle:hover{color:var(--text);border-color:var(--accent)}
+.theme-toggle svg{flex-shrink:0;transition:transform .4s}
+.theme-toggle .theme-label{transition:opacity .2s}
+.sidebar.collapsed .theme-label{opacity:0;width:0;overflow:hidden}
+.sidebar-version{font-size:.58rem;color:var(--text-secondary);text-align:center;transition:opacity .2s}
+.sidebar.collapsed .sidebar-version{opacity:0}
 
-/* Breathe animation on web circle */
-@keyframes webBreathe{
-  0%,100%{box-shadow:0 0 20px rgba(0,230,118,.1),0 0 40px rgba(0,230,118,.05);opacity:.6}
-  50%{box-shadow:0 0 50px rgba(0,230,118,.35),0 0 100px rgba(0,230,118,.12);opacity:1}
+/* Backdrop */
+.sidebar-backdrop{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.5);backdrop-filter:blur(4px);
+  z-index:150;opacity:0;transition:opacity .3s;
 }
-@keyframes webBlink{
-  0%,49%{opacity:1}50%,100%{opacity:.15}
-}
-@keyframes webStrobe{
-  0%,49%{opacity:1}50%,100%{opacity:0}
-}
-@keyframes webSos{
-  0%,5%{opacity:1}6%,11%{opacity:0}
-  12%,17%{opacity:1}18%,23%{opacity:0}
-  24%,29%{opacity:1}30%,40%{opacity:0}
-  41%,52%{opacity:1}53%,58%{opacity:0}
-  59%,70%{opacity:1}71%,76%{opacity:0}
-  77%,88%{opacity:1}89%,100%{opacity:0}
-}
-@keyframes webFadeIn{0%{opacity:0}100%{opacity:1}}
-@keyframes webFadeOut{0%{opacity:1}100%{opacity:0}}
+.sidebar-backdrop.visible{display:block;opacity:1}
 
-.led-circle.fx-breathe{animation:webBreathe 3s ease-in-out infinite}
-.led-circle.fx-blink{animation:webBlink 1s steps(1) infinite}
-.led-circle.fx-strobe{animation:webStrobe 100ms steps(1) infinite}
-.led-circle.fx-sos{animation:webSos 3.6s linear infinite}
-.led-circle.fx-fade_in{animation:webFadeIn 1.5s ease-out forwards}
-.led-circle.fx-fade_out{animation:webFadeOut 1.5s ease-in forwards}
+/* ===== Main ===== */
+.main{
+  margin-left:250px;flex:1;min-height:100vh;
+  padding:20px 32px;transition:margin-left .3s ease;
+}
+body.sidebar-collapsed .main{margin-left:56px}
 
-/* Brightness slider */
-.brightness-section{margin-bottom:24px;padding:0 8px}
-.brightness-section label{display:flex;justify-content:space-between;font-size:.85em;color:#889;margin-bottom:6px}
-.slider-track{position:relative;height:36px;display:flex;align-items:center}
+.menu-btn{
+  display:none;position:fixed;top:12px;left:12px;z-index:100;
+  width:38px;height:38px;border-radius:8px;
+  border:1px solid var(--border);background:var(--surface);
+  color:var(--text);font-size:1.1rem;cursor:pointer;
+  align-items:center;justify-content:center;
+  transition:all .2s;box-shadow:0 2px 8px rgba(0,0,0,.15);
+}
+.menu-btn:hover{border-color:var(--accent)}
+
+/* ===== Breadcrumb ===== */
+.page-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:20px;padding-bottom:16px;gap:12px;flex-wrap:wrap;
+  border-bottom:1px solid var(--border);
+}
+.breadcrumb{display:flex;align-items:center;gap:6px}
+.breadcrumb .bc-root{font-size:.72rem;color:var(--text-secondary);font-weight:500}
+.breadcrumb .bc-sep{font-size:.65rem;color:var(--text-secondary)}
+.breadcrumb .bc-current{font-size:.72rem;color:var(--accent);font-weight:600}
+.page-title{font-size:1.2rem;font-weight:700;color:var(--text);margin-top:2px}
+.page-actions{display:flex;gap:8px;align-items:center}
+.export-btn{
+  display:flex;align-items:center;gap:6px;
+  padding:7px 14px;border-radius:7px;
+  border:1px solid var(--border);background:var(--surface);
+  color:var(--text-secondary);font-size:.7rem;font-weight:600;
+  cursor:pointer;transition:all .2s;font-family:inherit;
+}
+.export-btn:hover{border-color:var(--accent);color:var(--accent)}
+.export-btn svg{width:14px;height:14px}
+
+/* Pages */
+.page{display:none;animation:pageIn .3s ease both;}
+.page.active{display:block}
+@keyframes pageIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* ===== FX Status Badge (inside active card) ===== */
+.fx-badge{
+  display:none;
+  width:8px;height:8px;border-radius:50%;
+  background:var(--accent);
+  position:absolute;top:6px;right:6px;
+  box-shadow:0 0 6px var(--accent),0 0 12px var(--accent-glow);
+  transition:opacity .3s;
+}
+.fx-card.active .fx-badge{display:block}
+.fx-card[data-cmd="off"].active .fx-badge{background:var(--red);box-shadow:0 0 6px var(--red),0 0 12px rgba(248,113,113,.2)}
+/* FX animations on the badge */
+@keyframes badgeBreathe{0%,100%{opacity:.4;box-shadow:0 0 4px var(--accent)}50%{opacity:1;box-shadow:0 0 14px var(--accent),0 0 24px var(--accent-glow)}}
+@keyframes badgeBlink{0%,49%{opacity:1}50%,100%{opacity:.1}}
+@keyframes badgeStrobe{0%,49%{opacity:1}50%,100%{opacity:0}}
+@keyframes badgeSos{
+  0%,5%{opacity:1}6%,11%{opacity:0}12%,17%{opacity:1}18%,23%{opacity:0}
+  24%,29%{opacity:1}30%,40%{opacity:0}41%,52%{opacity:1}53%,58%{opacity:0}
+  59%,70%{opacity:1}71%,76%{opacity:0}77%,88%{opacity:1}89%,100%{opacity:0}
+}
+@keyframes badgeFadeIn{0%{opacity:0}100%{opacity:1}}
+@keyframes badgeFadeOut{0%{opacity:1}100%{opacity:0}}
+.fx-badge.fx-on{animation:badgeBreathe 2.5s ease-in-out infinite}
+.fx-badge.fx-breathe{animation:badgeBreathe 3s ease-in-out infinite}
+.fx-badge.fx-blink{animation:badgeBlink 1s steps(1) infinite}
+.fx-badge.fx-strobe{animation:badgeStrobe 100ms steps(1) infinite}
+.fx-badge.fx-sos{animation:badgeSos 3.6s linear infinite}
+.fx-badge.fx-fade_in{animation:badgeFadeIn 1.5s ease-out forwards}
+.fx-badge.fx-fade_out{animation:badgeFadeOut 1.5s ease-in forwards}
+
+/* ===== Brightness ===== */
+.brightness-section{
+  margin-bottom:16px;padding:14px 18px;
+  border-radius:10px;border:1px solid var(--border);background:var(--surface);margin-top: 50px;
+}
+.brightness-control label{
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:.72rem;color:var(--text-secondary);font-weight:500;margin-bottom:8px;
+}
+.brightness-control label span:last-child{color:var(--accent);font-weight:700;font-variant-numeric:tabular-nums}
 input[type=range]{
-  -webkit-appearance:none;appearance:none;
-  width:100%;height:6px;
-  background:linear-gradient(90deg,#222 0%,#00e5ff 100%);
-  border-radius:3px;outline:none;
+  -webkit-appearance:none;appearance:none;width:100%;height:5px;
+  background:var(--slider-track);border-radius:3px;outline:none;cursor:pointer;
 }
 input[type=range]::-webkit-slider-thumb{
-  -webkit-appearance:none;appearance:none;
-  width:22px;height:22px;border-radius:50%;
-  background:#00e5ff;cursor:pointer;
-  box-shadow:0 0 10px rgba(0,229,255,.4);
+  -webkit-appearance:none;width:18px;height:18px;border-radius:50%;
+  background:var(--accent);cursor:pointer;border:2px solid var(--surface);
+  box-shadow:0 1px 4px rgba(0,0,0,.2);transition:transform .15s;
 }
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.15)}
 input[type=range]::-moz-range-thumb{
-  width:22px;height:22px;border-radius:50%;border:none;
-  background:#00e5ff;cursor:pointer;
-  box-shadow:0 0 10px rgba(0,229,255,.4);
+  width:18px;height:18px;border-radius:50%;background:var(--accent);
+  border:2px solid var(--surface);box-shadow:0 1px 4px rgba(0,0,0,.2);
+}
+input[type=range]::-moz-range-progress{
+  background:linear-gradient(90deg,var(--slider-fill-start),var(--slider-fill-end));
+  border-radius:3px;height:5px;
 }
 
-/* Effect cards grid */
-.effects-grid{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:8px;
-  margin-bottom:24px;
-}
+/* ===== Effects grid ===== */
+.section-header{font-size:.68rem;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
+.effects-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
 .fx-card{
-  padding:14px 4px;
-  border-radius:10px;
-  border:1px solid #1e1e3a;
-  background:#12122a;
-  text-align:center;
-  cursor:pointer;
-  transition:all .2s;
-  user-select:none;
+  display:flex;flex-direction:column;align-items:center;gap:5px;
+  padding:14px 6px;border-radius:10px;
+  border:1px solid var(--border);background:var(--surface);
+  cursor:pointer;transition:all .2s;user-select:none;position:relative;overflow:hidden;
 }
-.fx-card:hover{border-color:#00e5ff44;background:#181840}
-.fx-card:active{transform:scale(.94)}
+.fx-card:hover{
+  border-color:color-mix(in srgb,var(--accent) 40%,var(--border));
+  transform:translateY(-2px) scale(1.02);box-shadow:0 6px 20px rgba(0,0,0,.1);
+}
+.fx-card:active{transform:translateY(0) scale(.97);transition:transform .1s}
 .fx-card.active{
-  border-color:#00e5ff;
-  background:linear-gradient(135deg,#0d1b3e,#12122a);
-  box-shadow:0 0 16px rgba(0,229,255,.15);
+  border-color:var(--accent);
+  background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 8%,var(--surface)),color-mix(in srgb,var(--cyan) 4%,var(--surface)));
+  box-shadow:inset 3px 0 0 var(--accent);
 }
-.fx-card .icon{font-size:1.5em;margin-bottom:4px}
-.fx-card .name{font-size:.72em;color:#99a;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
-.fx-card.active .name{color:#00e5ff}
+.fx-card .icon{width:22px;height:22px;color:var(--text-secondary);transition:color .2s}
+.fx-card:hover .icon,.fx-card.active .icon{color:var(--accent)}
+.fx-card .name{font-size:.65rem;color:var(--text-secondary);font-weight:600;transition:color .2s}
+.fx-card.active .name{color:var(--accent)}
 
-/* Telemetry panel */
-.telemetry{
-  background:#12122a;
-  border:1px solid #1e1e3a;
-  border-radius:12px;
-  padding:16px;
-  margin-bottom:20px;
-}
-.telemetry h3{font-size:.8em;color:#556;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px}
-.tele-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.tele-item{display:flex;flex-direction:column;gap:4px}
-.tele-item .tl{font-size:.7em;color:#667;text-transform:uppercase;letter-spacing:.5px}
-.tele-item .tv{font-size:1em;font-weight:600;color:#ccd}
-.tele-item .bar{height:4px;border-radius:2px;background:#1a1a35;overflow:hidden;margin-top:2px}
-.tele-item .bar-fill{height:100%;border-radius:2px;transition:width .5s}
-.bar-rssi .bar-fill{background:linear-gradient(90deg,#f44336,#ff9800,#4caf50)}
-.bar-mem .bar-fill{background:linear-gradient(90deg,#00e5ff,#00b0ff)}
+/* ===== Telemetry Dashboard ===== */
+.tele-dashboard{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top: 50px;}
 
-/* Log */
-.log-section{margin-top:8px}
-.log-section summary{
-  font-size:.78em;color:#556;cursor:pointer;text-transform:uppercase;letter-spacing:.5px;
-  padding:4px 0;
+/* Gauge card (circular progress) */
+.gauge-card{
+  padding:18px;border-radius:10px;
+  border:1px solid var(--border);background:var(--surface);
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  transition:background .3s,border-color .3s;
 }
+.gauge-wrap{position:relative;width:100px;height:100px}
+.gauge-wrap svg{width:100%;height:100%;transform:rotate(-90deg)}
+.gauge-wrap .gauge-track{fill:none;stroke:var(--gauge-track);stroke-width:6}
+.gauge-wrap .gauge-fill{
+  fill:none;stroke-width:6;stroke-linecap:round;
+  transition:stroke-dashoffset .8s cubic-bezier(.4,0,.2,1),stroke .5s;
+}
+.gauge-center{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+}
+.gauge-value{font-size:1.2rem;font-weight:700;font-variant-numeric:tabular-nums;color:var(--text)}
+.gauge-unit{font-size:.6rem;color:var(--text-secondary);font-weight:500}
+.gauge-label{font-size:.65rem;color:var(--text-secondary);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+
+/* Stat card (simple value) */
+.stat-card{
+  padding:20px 22px;border-radius:10px;
+  border:1px solid var(--border);background:var(--surface);
+  display:flex;align-items:center;gap:14px;
+  transition:background .3s,border-color .3s;
+}
+.stat-icon{
+  display:flex;align-items:center;justify-content:center;
+  width:40px;height:40px;border-radius:8px;flex-shrink:0;
+}
+.stat-icon svg{width:18px;height:18px}
+.stat-icon.icon-rssi{background:rgba(251,191,36,.12);color:#fbbf24}
+.stat-icon.icon-uptime{background:rgba(99,102,241,.12);color:#818cf8}
+.stat-icon.icon-ip{background:rgba(34,211,238,.12);color:#22d3ee}
+.stat-info{flex:1;min-width:0}
+.stat-label{font-size:.65rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-bottom:2px}
+.stat-value{font-size:1.1rem;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums;transition:color .4s}
+/* RSSI bar under stat card */
+.stat-bar{height:3px;border-radius:2px;background:var(--surface-alt);overflow:hidden;margin-top:6px}
+.stat-bar-fill{height:100%;border-radius:2px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+.stat-bar-fill.bar-rssi{background:linear-gradient(90deg,var(--red),var(--orange),var(--green))}
+
+/* ===== Logs ===== */
+.log-page-container{display:flex;flex-direction:column;height:calc(100vh - 100px); margin-top: 50px;}
+.log-toolbar{
+  display:flex;align-items:center;gap:6px;margin-bottom:10px;flex-wrap:wrap;
+}
+.log-btn,.filter-btn{
+  padding:5px 11px;border-radius:6px;
+  border:1px solid var(--border);background:var(--surface);
+  color:var(--text-secondary);font-size:.67rem;font-weight:600;
+  cursor:pointer;transition:all .2s;font-family:inherit;
+}
+.log-btn:hover,.filter-btn:hover{border-color:var(--accent);color:var(--text)}
+.log-btn.active,.filter-btn.active{background:var(--accent-glow);border-color:var(--accent);color:var(--accent)}
+.log-spacer{flex:1}
 .log{
-  margin-top:8px;
-  background:#0d0d1a;
-  border:1px solid #1a1a30;
-  border-radius:8px;
-  padding:10px;
-  max-height:140px;
-  overflow-y:auto;
-  font-family:'Cascadia Code','Fira Code',monospace;
-  font-size:.73em;
-  color:#556;
+  flex:1;background:var(--log-bg);border:1px solid var(--border);
+  border-radius:8px;padding:10px;overflow-y:auto;
+  font-family:'Cascadia Code','Fira Code','JetBrains Mono',monospace;
+  font-size:.72rem;color:var(--text-secondary);
 }
-.log div{margin-bottom:1px}
-.log .ok{color:#00c853}
-.log .err{color:#f44336}
-.log .info{color:#42a5f5}
+.log::-webkit-scrollbar{width:5px}
+.log::-webkit-scrollbar-track{background:transparent}
+.log::-webkit-scrollbar-thumb{background:var(--scrollbar-thumb);border-radius:3px}
+.log{scrollbar-width:thin;scrollbar-color:var(--scrollbar-thumb) transparent}
+.log-entry{
+  display:flex;align-items:baseline;gap:10px;
+  padding:8px 6px;border-bottom:1px solid var(--border);
+  animation:logIn .2s ease-out;
+}
+@keyframes logIn{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:translateY(0)}}
+.log-entry .log-time{color:var(--accent);font-weight:500;flex-shrink:0;font-size:.65rem}
+.log-entry .log-badge{
+  font-size:.58rem;font-weight:700;padding:1px 5px;
+  border-radius:3px;flex-shrink:0;text-transform:uppercase;
+}
+.log-entry .log-badge.badge-ok{background:color-mix(in srgb,var(--green) 15%,transparent);color:var(--green)}
+.log-entry .log-badge.badge-err{background:color-mix(in srgb,var(--red) 15%,transparent);color:var(--red)}
+.log-entry .log-badge.badge-info{background:color-mix(in srgb,var(--accent) 15%,transparent);color:var(--accent)}
+.log-entry .log-msg{flex:1}
 
-/* Responsive */
-@media(max-width:400px){
-  .effects-grid{grid-template-columns:repeat(2,1fr);gap:6px}
-  .led-circle{width:120px;height:120px}
-  .led-circle .pct{font-size:1.6em}
-  .tele-grid{grid-template-columns:1fr}
+/* ===== Mobile ===== */
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%);width:270px;transition:transform .3s ease,background .3s}
+  .sidebar.mobile-open{transform:translateX(0)}
+  .sidebar.collapsed{width:270px}
+  .menu-btn{display:flex}
+  .main{margin-left:0 !important;padding:54px 16px 16px}
+  .effects-grid{grid-template-columns:repeat(4,1fr);gap:6px}
+  .tele-dashboard{grid-template-columns:repeat(2,1fr);gap:8px}
+}
+@media(max-width:480px){
+  .effects-grid{grid-template-columns:repeat(2,1fr)}
+  .tele-dashboard{grid-template-columns:1fr}
 }
 </style>
 </head>
 <body>
-<div class="app">
-  <div class="header">
-    <h1>LED DASHBOARD</h1>
-    <p class="sub">Effects</p>
-  </div>
 
-  <div class="badge-row">
-    <span class="badge broker-off" id="brokerBadge"><span class="dot"></span><span id="brokerText">BROKER</span></span>
-    <span class="badge offline" id="deviceBadge"><span class="dot"></span><span id="deviceText">DEVICE</span></span>
-  </div>
-
-  <div class="led-container">
-    <div class="led-circle off" id="ledCircle">
-      <span class="pct" id="ledPct">OFF</span>
-      <span class="effect-label" id="ledEffect"></span>
+<!-- ===== Sidebar ===== -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <svg class="brand-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+    <div class="brand-text">
+      <h1>Control Center</h1>
+      <span>IoT Device Manager</span>
     </div>
+    <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" title="Toggle sidebar">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
   </div>
 
-  <div class="brightness-section">
-    <label><span>Brillo</span><span id="briVal">100%</span></label>
-    <div class="slider-track">
-      <input type="range" id="briSlider" min="0" max="100" value="100">
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Status</div>
+    <div class="status-badges">
+      <div class="badge broker-off" id="brokerBadge"><span class="dot"></span><span class="badge-label" id="brokerText">Broker</span></div>
+      <div class="badge offline" id="deviceBadge"><span class="dot"></span><span class="badge-label" id="deviceText">Device</span></div>
     </div>
   </div>
 
-  <div class="effects-grid">
-    <div class="fx-card active" data-cmd="on" onclick="sendFx(this)">
-      <div class="icon">💡</div><div class="name">On</div>
-    </div>
-    <div class="fx-card" data-cmd="off" onclick="sendFx(this)">
-      <div class="icon">⭘</div><div class="name">Off</div>
-    </div>
-    <div class="fx-card" data-cmd="breathe" onclick="sendFx(this)">
-      <div class="icon">🫁</div><div class="name">Breathe</div>
-    </div>
-    <div class="fx-card" data-cmd="blink" onclick="sendFx(this)">
-      <div class="icon">👁</div><div class="name">Blink</div>
-    </div>
-    <div class="fx-card" data-cmd="sos" onclick="sendFx(this)">
-      <div class="icon">🆘</div><div class="name">SOS</div>
-    </div>
-    <div class="fx-card" data-cmd="strobe" onclick="sendFx(this)">
-      <div class="icon">⚡</div><div class="name">Strobe</div>
-    </div>
-    <div class="fx-card" data-cmd="fade_in" onclick="sendFx(this)">
-      <div class="icon">🌅</div><div class="name">Fade In</div>
-    </div>
-    <div class="fx-card" data-cmd="fade_out" onclick="sendFx(this)">
-      <div class="icon">🌑</div><div class="name">Fade Out</div>
-    </div>
-  </div>
+  <nav class="sidebar-nav">
+    <button class="nav-link active" data-page="pageControl" onclick="showPage('pageControl',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      <span class="nav-label">Control</span>
+    </button>
+    <button class="nav-link" data-page="pageTelemetry" onclick="showPage('pageTelemetry',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <span class="nav-label">Telemetry</span>
+    </button>
+    <button class="nav-link" data-page="pageLogs" onclick="showPage('pageLogs',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+      <span class="nav-label">Logs</span>
+    </button>
+  </nav>
 
-  <div class="telemetry">
-    <h3>Telemetria</h3>
-    <div class="tele-grid">
-      <div class="tele-item bar-rssi">
-        <span class="tl">WiFi RSSI</span>
-        <span class="tv" id="tRssi">-- dBm</span>
-        <div class="bar"><div class="bar-fill" id="tRssiBar" style="width:0"></div></div>
-      </div>
-      <div class="tele-item">
-        <span class="tl">Uptime</span>
-        <span class="tv" id="tUptime">--</span>
-      </div>
-      <div class="tele-item bar-mem">
-        <span class="tl">RAM libre</span>
-        <span class="tv" id="tRam">-- KB</span>
-        <div class="bar"><div class="bar-fill" id="tRamBar" style="width:0"></div></div>
-      </div>
-      <div class="tele-item">
-        <span class="tl">IP</span>
-        <span class="tv" id="tIp">--</span>
+  <div class="sidebar-spacer"></div>
+  <div class="sidebar-footer">
+    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">
+      <svg id="themeIconMoon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg id="themeIconSun" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      <span class="theme-label" id="themeLabel">Light mode</span>
+    </button>
+    <div class="sidebar-version">v2.1</div>
+  </div>
+</aside>
+
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeMobileSidebar()"></div>
+<button class="menu-btn" id="menuBtn" onclick="openMobileSidebar()">&#9776;</button>
+
+<!-- ===== Main ===== -->
+<main class="main">
+
+  <!-- PAGE: Control -->
+  <div class="page active" id="pageControl">
+    <div class="page-header">
+      <div>
+        <div class="breadcrumb"><span class="bc-root">Dashboard</span><span class="bc-sep">/</span><span class="bc-current">Control Panel</span></div>
+        <div class="page-title">Device Control</div>
       </div>
     </div>
+
+    <div class="brightness-section">
+      <div class="brightness-control">
+        <label><span>Brightness</span><span id="briVal">100%</span></label>
+        <input type="range" id="briSlider" min="0" max="100" value="100">
+      </div>
+    </div>
+
+    <div class="section-header">Effects</div>
+    <div class="effects-grid">
+      <div class="fx-card active" data-cmd="on" onclick="sendFx(this)">
+        <span class="fx-badge"></span>
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1h-6a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"/></svg>
+        <div class="name">On</div>
+      </div>
+      <div class="fx-card" data-cmd="off" onclick="sendFx(this)">
+        <span class="fx-badge"></span>
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64A9 9 0 1 1 5.64 6.64"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
+        <div class="name">Off</div>
+      </div>
+      <div class="fx-card" data-cmd="breathe" onclick="sendFx(this)">
+        <span class="fx-badge"></span>
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.7 7.7a7.5 7.5 0 1 0 0 8.6"/><path d="M21 12h-4"/><path d="M9 12H3"/></svg>
+        <div class="name">Breathe</div>
+      </div>
+      <div class="fx-card" data-cmd="blink" onclick="sendFx(this)">
+        <span class="fx-badge"></span>
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        <div class="name">Blink</div>
+      </div>
+      <div class="fx-card" data-cmd="sos" onclick="sendFx(this)">
+        <span class="fx-badge"></span>
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <div class="name">SOS</div>
+      </div>
+      <div class="fx-card" data-cmd="strobe" onclick="sendFx(this)">
+        <span class="fx-badge"></span>
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        <div class="name">Strobe</div>
+      </div>
+      <div class="fx-card" data-cmd="fade_in" onclick="sendFx(this)">
+        <span class="fx-badge"></span>
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="2" x2="12" y2="9"/><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"/><line x1="1" y1="18" x2="3" y2="18"/><line x1="21" y1="18" x2="23" y2="18"/><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"/></svg>
+        <div class="name">Fade In</div>
+      </div>
+      <div class="fx-card" data-cmd="fade_out" onclick="sendFx(this)">
+        <span class="fx-badge"></span>
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <div class="name">Fade Out</div>
+      </div>
+    </div>
   </div>
 
-  <details class="log-section">
-    <summary>Event Log</summary>
-    <div class="log" id="log"></div>
-  </details>
-</div>
+  <!-- PAGE: Telemetry -->
+  <div class="page" id="pageTelemetry">
+    <div class="page-header">
+      <div>
+        <div class="breadcrumb"><span class="bc-root">Dashboard</span><span class="bc-sep">/</span><span class="bc-current">Telemetry</span></div>
+        <div class="page-title">Device Telemetry</div>
+      </div>
+      <div class="page-actions">
+        <span style="font-size:.65rem;color:var(--text-secondary);font-variant-numeric:tabular-nums" id="teleUpdated">Last updated: --</span>
+        <button class="export-btn" onclick="exportTelemetryCSV()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export CSV
+        </button>
+      </div>
+    </div>
 
-<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <div class="tele-dashboard">
+      <!-- Gauge: RAM -->
+      <div class="gauge-card">
+        <div class="gauge-wrap">
+          <svg viewBox="0 0 100 100">
+            <circle class="gauge-track" cx="50" cy="50" r="42"/>
+            <circle class="gauge-fill" id="gaugeRam" cx="50" cy="50" r="42"
+              stroke="var(--green)" stroke-dasharray="263.89" stroke-dashoffset="263.89"/>
+          </svg>
+          <div class="gauge-center">
+            <span class="gauge-value" id="tRamPct">--%</span>
+            <span class="gauge-unit" id="tRam">-- KB</span>
+          </div>
+        </div>
+        <div class="gauge-label">Free RAM</div>
+      </div>
+
+      <!-- Gauge: Flash -->
+      <div class="gauge-card">
+        <div class="gauge-wrap">
+          <svg viewBox="0 0 100 100">
+            <circle class="gauge-track" cx="50" cy="50" r="42"/>
+            <circle class="gauge-fill" id="gaugeFlash" cx="50" cy="50" r="42"
+              stroke="var(--cyan)" stroke-dasharray="263.89" stroke-dashoffset="263.89"/>
+          </svg>
+          <div class="gauge-center">
+            <span class="gauge-value" id="tFlashPct">--%</span>
+            <span class="gauge-unit" id="tFlash">-- KB</span>
+          </div>
+        </div>
+        <div class="gauge-label">Flash Used</div>
+      </div>
+
+      <!-- Gauge: Temp -->
+      <div class="gauge-card">
+        <div class="gauge-wrap">
+          <svg viewBox="0 0 100 100">
+            <circle class="gauge-track" cx="50" cy="50" r="42"/>
+            <circle class="gauge-fill" id="gaugeTemp" cx="50" cy="50" r="42"
+              stroke="var(--green)" stroke-dasharray="263.89" stroke-dashoffset="263.89"/>
+          </svg>
+          <div class="gauge-center">
+            <span class="gauge-value" id="tTemp">--</span>
+            <span class="gauge-unit">&deg;C</span>
+          </div>
+        </div>
+        <div class="gauge-label">MCU Temp</div>
+      </div>
+
+      <!-- Stat: RSSI -->
+      <div class="stat-card">
+        <div class="stat-icon icon-rssi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg></div>
+        <div class="stat-info">
+          <div class="stat-label">WiFi RSSI</div>
+          <div class="stat-value" id="tRssi">-- dBm</div>
+          <div class="stat-bar"><div class="stat-bar-fill bar-rssi" id="tRssiBar" style="width:0"></div></div>
+        </div>
+      </div>
+
+      <!-- Stat: Uptime -->
+      <div class="stat-card">
+        <div class="stat-icon icon-uptime"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        <div class="stat-info">
+          <div class="stat-label">Uptime</div>
+          <div class="stat-value" id="tUptime">--</div>
+        </div>
+      </div>
+
+      <!-- Stat: IP -->
+      <div class="stat-card">
+        <div class="stat-icon icon-ip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
+        <div class="stat-info">
+          <div class="stat-label">IP Address</div>
+          <div class="stat-value" id="tIp">--</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE: Logs -->
+  <div class="page" id="pageLogs">
+    <div class="page-header">
+      <div>
+        <div class="breadcrumb"><span class="bc-root">Dashboard</span><span class="bc-sep">/</span><span class="bc-current">Event Logs</span></div>
+        <div class="page-title">Event Log</div>
+      </div>
+      <div class="page-actions">
+        <button class="export-btn" onclick="exportLogsCSV()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export CSV
+        </button>
+      </div>
+    </div>
+    <div class="log-page-container">
+      <div class="log-toolbar">
+        <button class="filter-btn active" data-filter="all" onclick="filterLog('all',this)">All</button>
+        <button class="filter-btn" data-filter="info" onclick="filterLog('info',this)">Info</button>
+        <button class="filter-btn" data-filter="ok" onclick="filterLog('ok',this)">Success</button>
+        <button class="filter-btn" data-filter="err" onclick="filterLog('err',this)">Error</button>
+        <div class="log-spacer"></div>
+        <button class="log-btn" id="autoScrollBtn" onclick="toggleAutoScroll()">Auto-scroll: ON</button>
+        <button class="log-btn" onclick="clearLog()">Clear</button>
+      </div>
+      <div class="log" id="log"></div>
+    </div>
+  </div>
+
+</main>
+
+<script src="https://unpkg.com/mqtt@4.3.8/dist/mqtt.min.js"></script>
 <script>
-const BROKER = 'ws://broker.hivemq.com:8000/mqtt';
-const T_CMD = 'xiao_pavas/led/cmd';
-const T_STATUS = 'xiao_pavas/led/status';
-const T_TELE = 'xiao_pavas/device/telemetry';
-const T_ONLINE = 'xiao_pavas/device/online';
+// --- Theme ---
+function initTheme(){
+  var saved=localStorage.getItem('dashboard-theme');
+  if(!saved)saved='dark';
+  document.documentElement.setAttribute('data-theme',saved);
+  updateThemeUI(saved);
+}
+function toggleTheme(){
+  var cur=document.documentElement.getAttribute('data-theme');
+  var next=cur==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',next);
+  localStorage.setItem('dashboard-theme',next);
+  updateThemeUI(next);
+  updateSliderTrack(briSlider);
+  var icon=document.querySelector('.theme-toggle svg:not([style*="display:none"])');
+  if(icon){icon.style.transform='rotate(180deg)';setTimeout(function(){icon.style.transform='';},400);}
+}
+function updateThemeUI(theme){
+  var moon=document.getElementById('themeIconMoon');
+  var sun=document.getElementById('themeIconSun');
+  var label=document.getElementById('themeLabel');
+  if(theme==='dark'){moon.style.display='';sun.style.display='none';label.textContent='Light mode';}
+  else{moon.style.display='none';sun.style.display='';label.textContent='Dark mode';}
+}
+initTheme();
 
-const $ = id => document.getElementById(id);
-const logEl = $('log');
-const ledCircle = $('ledCircle');
-const ledPct = $('ledPct');
-const ledEffect = $('ledEffect');
-const briSlider = $('briSlider');
-const briVal = $('briVal');
-const cards = document.querySelectorAll('.fx-card');
-
-let state = { effect: 'none', brightness: 100, led_on: false };
-
-function log(msg, cls) {
-  const d = document.createElement('div');
-  if (cls) d.className = cls;
-  d.textContent = '[' + new Date().toLocaleTimeString() + '] ' + msg;
-  logEl.prepend(d);
-  if (logEl.children.length > 80) logEl.lastChild.remove();
+// --- Sidebar ---
+var sidebar=document.getElementById('sidebar');
+var backdrop=document.getElementById('sidebarBackdrop');
+var isMobile=function(){return window.innerWidth<=768;};
+function toggleSidebar(){
+  if(isMobile()){closeMobileSidebar();return;}
+  sidebar.classList.toggle('collapsed');
+  document.body.classList.toggle('sidebar-collapsed');
+  localStorage.setItem('sidebar-collapsed',sidebar.classList.contains('collapsed'));
+}
+function openMobileSidebar(){sidebar.classList.add('mobile-open');backdrop.classList.add('visible');}
+function closeMobileSidebar(){sidebar.classList.remove('mobile-open');backdrop.classList.remove('visible');}
+if(!isMobile()&&localStorage.getItem('sidebar-collapsed')==='true'){
+  sidebar.classList.add('collapsed');document.body.classList.add('sidebar-collapsed');
 }
 
-// --- LED circle update ---
-function updateLedCircle() {
-  // Remove all fx- classes
-  ledCircle.className = 'led-circle';
+// --- Navigation ---
+function showPage(pageId,navEl){
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
+  var t=document.getElementById(pageId);if(t)t.classList.add('active');
+  document.querySelectorAll('.nav-link').forEach(function(n){n.classList.remove('active');});
+  if(navEl){navEl.classList.add('active');}
+  else{var m=document.querySelector('.nav-link[data-page="'+pageId+'"]');if(m)m.classList.add('active');}
+  localStorage.setItem('dashboard-page',pageId);
+  if(isMobile())closeMobileSidebar();
+}
+(function(){var s=localStorage.getItem('dashboard-page');if(s&&document.getElementById(s))showPage(s);})();
 
-  if (!state.led_on) {
-    ledCircle.classList.add('off');
-    ledPct.textContent = 'OFF';
-    ledEffect.textContent = '';
-    return;
-  }
+// --- Constants ---
+const BROKER='ws://'+location.hostname+':9001';
+const T_CMD='xiao_pavas/led/cmd';
+const T_STATUS='xiao_pavas/led/status';
+const T_TELE='xiao_pavas/device/telemetry';
+const T_ONLINE='xiao_pavas/device/online';
 
-  ledCircle.classList.add('on');
-  ledPct.textContent = state.brightness + '%';
+const $=id=>document.getElementById(id);
+const logEl=$('log');
+const briSlider=$('briSlider');
+const briVal=$('briVal');
+const cards=document.querySelectorAll('.fx-card');
 
-  if (state.effect !== 'none') {
-    ledCircle.classList.add('fx-' + state.effect);
-    ledEffect.textContent = state.effect.replace('_', ' ');
+let state={effect:'none',brightness:100,led_on:false};
+let autoScroll=true;
+let logFilter='all';
+
+// Gauge circumference: 2*PI*42 = 263.89
+const GAUGE_C=263.89;
+
+// --- Telemetry history for export ---
+let teleHistory=[];
+
+// --- Log history for export ---
+let logHistory=[];
+
+// --- Log ---
+function log(msg,cls){
+  var ts=new Date().toLocaleTimeString();
+  logHistory.push({time:ts,type:cls||'info',message:msg});
+  if(logHistory.length>500)logHistory.shift();
+
+  var entry=document.createElement('div');
+  entry.className='log-entry'+(cls?' log-type-'+cls:'');
+  var time=document.createElement('span');time.className='log-time';time.textContent=ts;
+  var badge=document.createElement('span');badge.className='log-badge';
+  if(cls==='ok'){badge.classList.add('badge-ok');badge.textContent='OK';}
+  else if(cls==='err'){badge.classList.add('badge-err');badge.textContent='ERR';}
+  else{badge.classList.add('badge-info');badge.textContent='INFO';}
+  var message=document.createElement('span');message.className='log-msg';message.textContent=msg;
+  entry.appendChild(time);entry.appendChild(badge);entry.appendChild(message);
+  if(logFilter!=='all'&&cls!==logFilter)entry.style.display='none';
+  logEl.prepend(entry);
+  if(logEl.children.length>200)logEl.lastChild.remove();
+}
+
+function clearLog(){logEl.innerHTML='';}
+function toggleAutoScroll(){
+  autoScroll=!autoScroll;
+  $('autoScrollBtn').textContent='Auto-scroll: '+(autoScroll?'ON':'OFF');
+  $('autoScrollBtn').classList.toggle('active',autoScroll);
+}
+function filterLog(type,btn){
+  logFilter=type;
+  document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active');});
+  if(btn)btn.classList.add('active');
+  logEl.querySelectorAll('.log-entry').forEach(function(entry){
+    if(type==='all')entry.style.display='';
+    else entry.style.display=entry.classList.contains('log-type-'+type)?'':'none';
+  });
+}
+
+// --- Set gauge offset ---
+function setGauge(id,pct){
+  var el=$(id);if(!el)return;
+  var offset=GAUGE_C-(GAUGE_C*Math.max(0,Math.min(100,pct))/100);
+  el.style.strokeDashoffset=offset;
+}
+
+// --- FX badge update ---
+function updateFxBadge(){
+  // Clear all badge FX classes
+  document.querySelectorAll('.fx-badge').forEach(function(b){
+    b.className='fx-badge';
+  });
+  // Determine which effect class to apply on the active card's badge
+  var fxClass='';
+  if(!state.led_on){
+    fxClass='';// off card has no glow animation
+  } else if(state.effect==='none'){
+    fxClass='fx-on';// solid = gentle breathe
   } else {
-    ledEffect.textContent = 'solid';
+    fxClass='fx-'+state.effect;
+  }
+  // Find the active card and apply the FX class to its badge
+  var activeCard=document.querySelector('.fx-card.active');
+  if(activeCard&&fxClass){
+    var badge=activeCard.querySelector('.fx-badge');
+    if(badge)badge.classList.add(fxClass);
   }
 }
 
 // --- Active card highlight ---
-function highlightCard(cmd) {
-  cards.forEach(c => c.classList.remove('active'));
-  const match = document.querySelector('.fx-card[data-cmd="' + cmd + '"]');
-  if (match) match.classList.add('active');
+function highlightCard(cmd){
+  cards.forEach(c=>c.classList.remove('active'));
+  var match=document.querySelector('.fx-card[data-cmd="'+cmd+'"]');
+  if(match)match.classList.add('active');
+  updateFxBadge();
 }
 
 // --- Status handler ---
-function handleStatus(data) {
-  try {
-    const s = JSON.parse(data);
-    state.effect = s.effect || 'none';
-    state.brightness = s.brightness != null ? s.brightness : 100;
-    state.led_on = !!s.led_on;
-
-    briSlider.value = state.brightness;
-    briVal.textContent = state.brightness + '%';
-    updateLedCircle();
-
-    // Highlight correct card
-    if (!state.led_on) {
-      highlightCard('off');
-    } else if (state.effect === 'none') {
-      highlightCard('on');
-    } else {
-      highlightCard(state.effect);
-    }
-  } catch (e) {
-    // Legacy simple status
-    const on = data.trim().toUpperCase() === 'ON';
-    state.led_on = on;
-    state.effect = 'none';
-    updateLedCircle();
-    highlightCard(on ? 'on' : 'off');
+function handleStatus(data){
+  try{
+    var s=JSON.parse(data);
+    state.effect=s.effect||'none';
+    state.brightness=s.brightness!=null?s.brightness:100;
+    state.led_on=!!s.led_on;
+    briSlider.value=state.brightness;briVal.textContent=state.brightness+'%';
+    updateSliderTrack(briSlider);updateFxBadge();
+    if(!state.led_on)highlightCard('off');
+    else if(state.effect==='none')highlightCard('on');
+    else highlightCard(state.effect);
+  }catch(e){
+    var on=data.trim().toUpperCase()==='ON';
+    state.led_on=on;state.effect='none';
+    updateFxBadge();highlightCard(on?'on':'off');
   }
 }
 
 // --- Telemetry handler ---
-function handleTelemetry(data) {
-  try {
-    const t = JSON.parse(data);
+function handleTelemetry(data){
+  try{
+    var t=JSON.parse(data);
+    var row={time:new Date().toLocaleTimeString()};
+
     // RSSI
-    const rssi = t.rssi || 0;
-    $('tRssi').textContent = rssi + ' dBm';
-    // RSSI range: -100 (bad) to -30 (great)
-    const rssiPct = Math.max(0, Math.min(100, ((rssi + 100) / 70) * 100));
-    $('tRssiBar').style.width = rssiPct + '%';
+    var rssi=t.rssi||0;row.rssi=rssi;
+    $('tRssi').textContent=rssi+' dBm';
+    var rssiPct=Math.max(0,Math.min(100,((rssi+100)/70)*100));
+    $('tRssiBar').style.width=rssiPct+'%';
 
     // Uptime
-    const ut = t.uptime || 0;
-    const h = Math.floor(ut / 3600);
-    const m = Math.floor((ut % 3600) / 60);
-    const s = ut % 60;
-    $('tUptime').textContent = h + 'h ' + m + 'm ' + s + 's';
+    var ut=t.uptime||0;row.uptime=ut;
+    var h=Math.floor(ut/3600),m=Math.floor((ut%3600)/60),s=ut%60;
+    $('tUptime').textContent=h+'h '+m+'m '+s+'s';
 
     // RAM
-    const ram = t.free_ram || 0;
-    const ramKb = (ram / 1024).toFixed(1);
-    $('tRam').textContent = ramKb + ' KB';
-    // Assume 512KB total for bar
-    const ramPct = Math.min(100, (ram / (512 * 1024)) * 100);
-    $('tRamBar').style.width = ramPct + '%';
+    var ram=t.free_ram||0;row.free_ram=ram;
+    var ramKb=(ram/1024).toFixed(1);
+    $('tRam').textContent=ramKb+' KB';
+    var ramPct=Math.min(100,(ram/(512*1024))*100);
+    $('tRamPct').textContent=Math.round(ramPct)+'%';
+    setGauge('gaugeRam',ramPct);
+
+    // Flash
+    var fsTotal=t.fs_total||1,fsFree=t.fs_free||0;
+    var fsUsed=fsTotal-fsFree;
+    row.fs_used=fsUsed;row.fs_total=fsTotal;
+    var fsUsedKb=(fsUsed/1024).toFixed(1),fsTotalKb=(fsTotal/1024).toFixed(1);
+    $('tFlash').textContent=fsUsedKb+'/'+fsTotalKb+' KB';
+    var fsPct=Math.min(100,(fsUsed/fsTotal)*100);
+    $('tFlashPct').textContent=Math.round(fsPct)+'%';
+    setGauge('gaugeFlash',fsPct);
+    // Color flash gauge based on usage
+    var flashGauge=$('gaugeFlash');
+    if(fsPct>85)flashGauge.style.stroke='var(--red)';
+    else if(fsPct>60)flashGauge.style.stroke='var(--orange)';
+    else flashGauge.style.stroke='var(--cyan)';
+
+    // Temp
+    if(t.temp_c!=null){
+      row.temp_c=t.temp_c;
+      $('tTemp').textContent=t.temp_c;
+      var tc=t.temp_c;
+      var tempColor;
+      if(tc<30)tempColor='var(--accent)';
+      else if(tc<45)tempColor='var(--green)';
+      else if(tc<60)tempColor='var(--orange)';
+      else tempColor='var(--red)';
+      var tempPct=Math.max(0,Math.min(100,((tc-10)/80)*100));
+      setGauge('gaugeTemp',tempPct);
+      $('gaugeTemp').style.stroke=tempColor;
+      $('tTemp').style.color=tempColor;
+    }
 
     // IP
-    $('tIp').textContent = t.ip || '--';
-  } catch (e) {}
+    $('tIp').textContent=t.ip||'--';
+    row.ip=t.ip||'';
+
+    $('teleUpdated').textContent='Last updated: '+new Date().toLocaleTimeString();
+
+    teleHistory.push(row);
+    if(teleHistory.length>1000)teleHistory.shift();
+  }catch(e){}
 }
 
-// --- Online/Offline badge ---
-function setDeviceOnline(online) {
-  const b = $('deviceBadge');
-  b.className = 'badge ' + (online ? 'online' : 'offline');
-  $('deviceText').textContent = online ? 'ONLINE' : 'OFFLINE';
+// --- Online/Offline ---
+function setDeviceOnline(online){
+  $('deviceBadge').className='badge '+(online?'online':'offline');
+  $('deviceText').textContent=online?'Online':'Offline';
 }
-
-function setBrokerConnected(ok) {
-  const b = $('brokerBadge');
-  b.className = 'badge ' + (ok ? 'broker' : 'broker-off');
-  $('brokerText').textContent = ok ? 'BROKER' : 'BROKER';
-  cards.forEach(c => { if (ok) c.style.pointerEvents = ''; else c.style.pointerEvents = 'none'; });
-  briSlider.disabled = !ok;
+function setBrokerConnected(ok){
+  $('brokerBadge').className='badge '+(ok?'broker':'broker-off');
+  $('brokerText').textContent='Broker';
+  cards.forEach(c=>{c.style.pointerEvents=ok?'':'none';});
+  briSlider.disabled=!ok;
 }
 
 // --- MQTT ---
-log('Conectando a broker...', 'info');
-const client = mqtt.connect(BROKER, {
-  clientId: 'web_fx_' + Math.random().toString(16).slice(2, 8),
-  clean: true,
-  reconnectPeriod: 3000,
+log('Connecting to broker...','info');
+const client=mqtt.connect(BROKER,{
+  clientId:'web_fx_'+Math.random().toString(16).slice(2,8),
+  clean:true,reconnectPeriod:3000
 });
-
-client.on('connect', function () {
-  setBrokerConnected(true);
-  log('Conectado al broker MQTT', 'ok');
-  client.subscribe([T_STATUS, T_TELE, T_ONLINE]);
-  log('Suscrito a topicos', 'ok');
+client.on('connect',function(){
+  setBrokerConnected(true);log('Connected to MQTT broker','ok');
+  client.subscribe([T_STATUS,T_TELE,T_ONLINE]);log('Subscribed to topics','ok');
 });
-
-client.on('message', function (topic, msg) {
-  const t = topic.toString();
-  const val = msg.toString();
-
-  if (t === T_STATUS) {
-    handleStatus(val);
-    log('Status: ' + val, 'ok');
-  } else if (t === T_TELE) {
-    handleTelemetry(val);
-  } else if (t === T_ONLINE) {
-    const online = val.trim().toLowerCase() === 'online';
+client.on('message',function(topic,msg){
+  var t=topic.toString(),val=msg.toString();
+  if(t===T_STATUS){handleStatus(val);log('Status: '+val,'ok');}
+  else if(t===T_TELE){handleTelemetry(val);}
+  else if(t===T_ONLINE){
+    var online=val.trim().toLowerCase()==='online';
     setDeviceOnline(online);
-    log('Device: ' + (online ? 'ONLINE' : 'OFFLINE'), online ? 'ok' : 'err');
+    log('Device: '+(online?'ONLINE':'OFFLINE'),online?'ok':'err');
   }
 });
+client.on('offline',function(){setBrokerConnected(false);log('Broker disconnected','err');});
+client.on('error',function(err){log('Error: '+err.message,'err');});
 
-client.on('offline', function () {
-  setBrokerConnected(false);
-  log('Broker desconectado', 'err');
-});
-
-client.on('error', function (err) {
-  log('Error: ' + err.message, 'err');
-});
-
-// --- Optimistic UI update ---
-function applyOptimistic(cmd) {
-  if (cmd === 'on') {
-    state.led_on = true; state.effect = 'none';
-  } else if (cmd === 'off') {
-    state.led_on = false; state.effect = 'none';
-  } else if (cmd === 'toggle') {
-    state.led_on = !state.led_on; state.effect = 'none';
-  } else if (['breathe','blink','strobe','sos','fade_in','fade_out'].includes(cmd)) {
-    state.led_on = true; state.effect = cmd;
+// --- Optimistic UI ---
+function applyOptimistic(cmd){
+  if(cmd==='on'){state.led_on=true;state.effect='none';}
+  else if(cmd==='off'){state.led_on=false;state.effect='none';}
+  else if(cmd==='toggle'){state.led_on=!state.led_on;state.effect='none';}
+  else if(['breathe','blink','strobe','sos','fade_in','fade_out'].includes(cmd)){
+    state.led_on=true;state.effect=cmd;
   }
-  updateLedCircle();
-  if (!state.led_on) highlightCard('off');
-  else if (state.effect === 'none') highlightCard('on');
+  updateFxBadge();
+  if(!state.led_on)highlightCard('off');
+  else if(state.effect==='none')highlightCard('on');
   else highlightCard(state.effect);
 }
+function send(cmd){client.publish(T_CMD,cmd);log('Sent: '+cmd,'info');}
+function sendFx(el){var cmd=el.dataset.cmd;applyOptimistic(cmd);send(cmd);}
 
-// --- Send commands ---
-function send(cmd) {
-  client.publish(T_CMD, cmd);
-  log('Enviado: ' + cmd, 'info');
+// --- Brightness slider ---
+function updateSliderTrack(slider){
+  var pct=slider.value;
+  var theme=document.documentElement.getAttribute('data-theme');
+  var bg=theme==='light'?'#e0e3eb':'#1a1d28';
+  slider.style.background='linear-gradient(90deg,#4f46e5 0%,#6366f1 '+pct+'%,'+bg+' '+pct+'%)';
 }
-
-function sendFx(el) {
-  const cmd = el.dataset.cmd;
-  applyOptimistic(cmd);
-  send(cmd);
-}
-
-// --- Brightness slider with debounce ---
-let briTimeout = null;
-briSlider.addEventListener('input', function () {
-  const v = this.value;
-  briVal.textContent = v + '%';
-  state.brightness = parseInt(v);
-  updateLedCircle();
-  if (briTimeout) clearTimeout(briTimeout);
-  briTimeout = setTimeout(() => {
-    send('brightness:' + v);
-  }, 150);
+var briTimeout=null;
+briSlider.addEventListener('input',function(){
+  var v=this.value;briVal.textContent=v+'%';
+  state.brightness=parseInt(v);updateFxBadge();updateSliderTrack(this);
+  if(briTimeout)clearTimeout(briTimeout);
+  briTimeout=setTimeout(function(){send('brightness:'+v);},150);
 });
 
+// --- Export CSV ---
+function downloadCSV(filename,csvContent){
+  var blob=new Blob([csvContent],{type:'text/csv;charset=utf-8;'});
+  var link=document.createElement('a');
+  link.href=URL.createObjectURL(blob);
+  link.download=filename;
+  link.click();URL.revokeObjectURL(link.href);
+}
+
+function exportTelemetryCSV(){
+  if(teleHistory.length===0){log('No telemetry data to export','err');return;}
+  var headers='Time,RSSI (dBm),Uptime (s),Free RAM (bytes),Flash Used (bytes),Flash Total (bytes),Temp (C),IP\n';
+  var rows=teleHistory.map(function(r){
+    return [r.time,r.rssi||'',r.uptime||'',r.free_ram||'',r.fs_used||'',r.fs_total||'',r.temp_c||'',r.ip||''].join(',');
+  }).join('\n');
+  downloadCSV('telemetry_'+new Date().toISOString().slice(0,10)+'.csv',headers+rows);
+  log('Exported '+teleHistory.length+' telemetry records','ok');
+}
+
+function exportLogsCSV(){
+  if(logHistory.length===0){log('No logs to export','err');return;}
+  var headers='Time,Type,Message\n';
+  var rows=logHistory.map(function(r){
+    return [r.time,r.type,'"'+r.message.replace(/"/g,'""')+'"'].join(',');
+  }).join('\n');
+  downloadCSV('logs_'+new Date().toISOString().slice(0,10)+'.csv',headers+rows);
+  log('Exported '+logHistory.length+' log entries','ok');
+}
+
 // Init
-updateLedCircle();
+updateFxBadge();
+updateSliderTrack(briSlider);
 </script>
 </body>
 </html>

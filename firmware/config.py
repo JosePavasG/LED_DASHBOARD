@@ -7,14 +7,15 @@ Editar con tus credenciales antes de subir a la placa.
 # ---------------------------------------------------------------
 # WiFi
 # ---------------------------------------------------------------
-WIFI_SSID = ""       # Tu red WiFi
-WIFI_PASSWORD = ""   # Tu contraseña WiFi
+WIFI_SSID = "Pavas garzón"
+WIFI_PASSWORD = "1001725730"
 WIFI_TIMEOUT_S = 15
 
 # ---------------------------------------------------------------
-# MQTT - Broker publico HiveMQ (sin instalar nada)
+# MQTT - Broker Mosquitto local (Docker)
+# Cambiar MQTT_BROKER a la IP de la maquina que corre Docker
 # ---------------------------------------------------------------
-MQTT_BROKER = "broker.hivemq.com"
+MQTT_BROKER = "192.168.1.12"
 MQTT_PORT = 1883
 MQTT_CLIENT_ID = "xiao_esp32s3"
 MQTT_USER = ""
