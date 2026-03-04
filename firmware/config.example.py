@@ -1,31 +1,37 @@
 """
 Configuracion WiFi y MQTT
 ==========================
-Editar con tus credenciales antes de subir a la placa.
+1. Copiar a config.py:     cp config.example.py config.py
+2. Editar credenciales en config.py
+3. Subir a la placa:       mpremote cp firmware/config.py :config.py
+
+config.py esta en .gitignore — nunca se commitea al repo.
+Los valores aqui son defaults que config_store.py puede sobreescribir
+en runtime via MQTT (persistidos en /config.json en el dispositivo).
 """
 
 # ---------------------------------------------------------------
 # WiFi
 # ---------------------------------------------------------------
-WIFI_SSID = "Pavas garzón"
-WIFI_PASSWORD = "1001725730"
+WIFI_SSID = "TU_SSID"
+WIFI_PASSWORD = "TU_PASSWORD"
 WIFI_TIMEOUT_S = 15
 
 # ---------------------------------------------------------------
 # MQTT - Broker Mosquitto local (Docker)
 # Cambiar MQTT_BROKER a la IP de la maquina que corre Docker
 # ---------------------------------------------------------------
-MQTT_BROKER = "192.168.1.12"
+MQTT_BROKER = "192.168.1.100"
 MQTT_PORT = 1883
-MQTT_CLIENT_ID = "xiao_esp32s3"
+MQTT_CLIENT_ID = ""                     # auto-generated from MAC if empty
 MQTT_USER = ""
 MQTT_PASSWORD = ""
 
-# Topicos (prefijo unico para evitar colisiones)
-MQTT_TOPIC_CMD = b"xiao_pavas/led/cmd"
-MQTT_TOPIC_STATUS = b"xiao_pavas/led/status"
-MQTT_TOPIC_TELEMETRY = b"xiao_pavas/device/telemetry"
-MQTT_TOPIC_ONLINE = b"xiao_pavas/device/online"
+# Topicos — {mac} se reemplaza en runtime con MAC hyphenated (AA-BB-CC-DD-EE-FF)
+MQTT_TOPIC_PREFIX = "d/{mac}"
+
+# Nombre amigable del dispositivo (opcional, se usa MAC si esta vacio)
+DEVICE_NAME = ""
 
 MQTT_KEEPALIVE = 60
 
@@ -48,8 +54,10 @@ BREATHE_PERIOD_MS = 3000
 BLINK_PERIOD_MS = 1000
 STROBE_PERIOD_MS = 100
 SOS_UNIT_MS = 200
+MORSE_UNIT_MS = 150
 
 # ---------------------------------------------------------------
 # Telemetria
+# NOTA: FW_VERSION se define en boot.py (inicio del archivo)
 # ---------------------------------------------------------------
 TELEMETRY_INTERVAL_S = 5

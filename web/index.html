@@ -100,6 +100,12 @@ body{
 }
 .badge .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;transition:all .3s}
 .badge .badge-label{transition:opacity .15s}
+.badge .badge-count{
+  font-size:.6rem;font-weight:700;
+  background:var(--surface);border-radius:8px;
+  padding:1px 5px;margin-left:auto;
+  min-width:16px;text-align:center;
+}
 /* Collapsed: hide entire status section */
 .sidebar.collapsed .sidebar-section{height:0;margin:0;overflow:hidden;opacity:0;transition:all .2s}
 @keyframes dotPulse{
@@ -385,6 +391,204 @@ input[type=range]::-moz-range-progress{
 .log-entry .log-badge.badge-info{background:color-mix(in srgb,var(--accent) 15%,transparent);color:var(--accent)}
 .log-entry .log-msg{flex:1}
 
+/* ===== Morse Section ===== */
+.morse-section{
+  margin-top:16px;padding:14px 18px;
+  border-radius:10px;border:1px solid var(--border);background:var(--surface);
+}
+.morse-section .section-header{margin-bottom:8px}
+.morse-row{display:flex;gap:8px;align-items:center}
+.morse-input{
+  flex:1;padding:8px 12px;border-radius:7px;
+  border:1px solid var(--border);background:var(--surface-alt);
+  color:var(--text);font-size:.78rem;font-family:inherit;
+  outline:none;transition:border-color .2s;
+}
+.morse-input:focus{border-color:var(--accent)}
+.morse-input::placeholder{color:var(--text-secondary)}
+.morse-btn{
+  padding:8px 16px;border-radius:7px;border:none;
+  background:var(--accent);color:#fff;font-size:.72rem;
+  font-weight:600;cursor:pointer;transition:all .2s;font-family:inherit;
+  white-space:nowrap;
+}
+.morse-btn:hover{background:var(--accent-hover)}
+.morse-status{font-size:.65rem;color:var(--text-secondary);margin-top:6px}
+
+/* ===== Boot/Crash stat cards ===== */
+.stat-icon.icon-boot{background:rgba(99,102,241,.12);color:#818cf8}
+.stat-icon.icon-latency{background:rgba(34,211,238,.12);color:#22d3ee}
+.stat-value-mac{font-size:.85rem;letter-spacing:.5px}
+.stat-value-small{font-size:.78rem;font-weight:600;color:var(--text);word-break:break-all}
+
+/* ===== Settings Page ===== */
+.settings-grid{
+  display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:50px;
+}
+.settings-card{
+  padding:18px 20px;border-radius:10px;
+  border:1px solid var(--border);background:var(--surface);
+}
+.settings-card h3{
+  font-size:.72rem;font-weight:700;color:var(--accent);
+  text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;
+  padding-bottom:8px;border-bottom:1px solid var(--border);
+}
+.settings-field{margin-bottom:10px}
+.settings-field label{
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:.65rem;font-weight:600;
+  color:var(--text-secondary);text-transform:uppercase;
+  letter-spacing:.3px;margin-bottom:4px;
+}
+.settings-field input{
+  width:100%;padding:7px 10px;border-radius:6px;
+  border:1px solid var(--border);background:var(--surface-alt);
+  color:var(--text);font-size:.75rem;font-family:inherit;
+  outline:none;transition:border-color .2s;
+}
+.settings-field input:focus{border-color:var(--accent)}
+/* Hide native number spinners */
+.settings-field input[type=number]::-webkit-inner-spin-button,
+.settings-field input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.settings-field input[type=number]{-moz-appearance:textfield}
+/* Custom stepper wrapper — both buttons on the right */
+.num-stepper{display:flex;align-items:stretch;gap:0}
+.num-stepper input{border-radius:6px 0 0 6px;flex:1;min-width:0}
+.num-stepper .step-btn{
+  display:flex;align-items:center;justify-content:center;
+  width:28px;border:1px solid var(--border);background:var(--surface-alt);
+  color:var(--text-secondary);font-size:.85rem;font-weight:600;
+  cursor:pointer;transition:all .15s;user-select:none;flex-shrink:0;
+}
+.num-stepper .step-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+.num-stepper .step-btn:active{transform:scale(.92)}
+.num-stepper .step-btn.step-minus{border-radius:0;border-right:none;border-left:none}
+.num-stepper .step-btn.step-plus{border-radius:0 6px 6px 0;border-left:none}
+.settings-actions{
+  grid-column:1/-1;display:flex;gap:10px;align-items:center;
+  padding-top:4px;
+}
+.settings-save{
+  padding:9px 22px;border-radius:7px;border:none;
+  background:var(--accent);color:#fff;font-size:.75rem;
+  font-weight:700;cursor:pointer;transition:all .2s;font-family:inherit;
+}
+.settings-save:hover{background:var(--accent-hover)}
+.settings-cancel{
+  padding:9px 22px;border-radius:7px;border:none;
+  background:var(--red);color:#fff;font-size:.75rem;
+  font-weight:700;cursor:pointer;transition:all .2s;font-family:inherit;
+}
+.settings-cancel:hover{opacity:.85}
+.settings-status{font-size:.7rem;color:var(--text-secondary);flex:1}
+.settings-status.success{color:var(--green)}
+.settings-status.error{color:var(--red)}
+.settings-status.restarting{
+  color:var(--orange);font-weight:600;
+  animation:pulse-restart 1.2s ease-in-out infinite;
+}
+@keyframes pulse-restart{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* WiFi scan combobox */
+.ssid-combo{position:relative}
+.ssid-combo input{width:100%;padding-right:32px}
+.ssid-arrow{
+  position:absolute;right:1px;top:1px;bottom:1px;width:28px;
+  border:none;border-left:1px solid var(--border);border-radius:0 6px 6px 0;
+  background:var(--surface-alt);color:var(--text-secondary);font-size:.85rem;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:background .2s,color .2s;
+}
+.ssid-arrow:hover{background:var(--accent);color:#fff}
+.ssid-dropdown{
+  position:absolute;top:100%;left:0;right:0;margin-top:4px;
+  background:var(--surface);border:1px solid var(--border);border-radius:8px;
+  max-height:200px;overflow-y:auto;display:none;z-index:100;
+  box-shadow:0 8px 24px rgba(0,0,0,.3);
+}
+.ssid-dropdown.open{display:block}
+.ssid-dropdown-item{
+  padding:8px 12px;cursor:pointer;font-size:.78rem;
+  border-bottom:1px solid var(--border);transition:background .15s;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.ssid-dropdown-item:last-child{border-bottom:none}
+.ssid-dropdown-item:hover{background:var(--accent-glow)}
+.ssid-dropdown-item .net-name{font-weight:500;color:var(--text)}
+.ssid-dropdown-item .net-meta{font-size:.68rem;color:var(--text-secondary)}
+.ssid-dropdown-item .net-saved{color:var(--green);font-size:.68rem;margin-left:6px}
+.ssid-dropdown-msg{padding:10px 12px;font-size:.75rem;color:var(--text-secondary);text-align:center}
+
+/* Info tooltips */
+.info-tip{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:14px;height:14px;border-radius:50%;font-size:8px;
+  font-style:normal;font-weight:700;line-height:1;
+  color:#fff;background:var(--accent);border:none;
+  cursor:help;position:relative;user-select:none;flex-shrink:0;
+  opacity:.6;transition:opacity .2s;vertical-align:middle;
+}
+.info-tip:hover{opacity:1}
+.info-tip:hover::after{
+  content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);left:0;
+  padding:6px 10px;border-radius:6px;font-size:.65rem;font-weight:400;
+  font-style:normal;text-transform:none;letter-spacing:0;
+  white-space:normal;width:max-content;max-width:200px;
+  background:var(--surface-alt);color:var(--text);
+  border:1px solid var(--border);box-shadow:0 4px 12px rgba(0,0,0,.2);
+  z-index:200;pointer-events:none;
+}
+/* Settings labels have ? on the right — tooltip opens leftward */
+.settings-field .info-tip:hover::after{left:auto;right:0}
+
+/* ===== Device Picker ===== */
+.dev-picker{padding:0 4px}
+.dev-picker-field{position:relative}
+.dev-picker-input{
+  width:100%;padding:6px 28px 6px 8px;border-radius:6px;
+  border:1px solid var(--border);background:var(--surface-alt);
+  color:var(--text);font-size:.72rem;font-family:inherit;
+  outline:none;transition:border-color .2s;
+}
+.dev-picker-input:focus{border-color:var(--accent)}
+.dev-picker-input::placeholder{color:var(--text-secondary)}
+.dev-picker-arrow{
+  position:absolute;right:5px;top:50%;transform:translateY(-50%);
+  width:20px;height:20px;border:none;background:none;
+  color:var(--text-secondary);cursor:pointer;font-size:.75rem;
+  display:flex;align-items:center;justify-content:center;
+  transition:color .2s,transform .2s;
+}
+.dev-picker-arrow:hover{color:var(--accent)}
+.dev-picker-arrow.open{transform:translateY(-50%) rotate(180deg)}
+.dev-picker-dd{
+  margin-top:4px;
+  background:var(--surface);border:1px solid var(--border);border-radius:8px;
+  max-height:0;overflow:hidden;
+  transition:max-height .25s ease,opacity .2s ease,border-color .2s;
+  opacity:0;border-color:transparent;
+}
+.dev-picker-dd.open{max-height:175px;overflow-y:auto;opacity:1;border-color:var(--border)}
+.dev-picker-dd::-webkit-scrollbar{width:4px}
+.dev-picker-dd::-webkit-scrollbar-thumb{background:var(--scrollbar-thumb);border-radius:2px}
+.dev-picker-item{
+  padding:7px 10px;cursor:pointer;font-size:.72rem;
+  border-bottom:1px solid var(--border);transition:background .12s;
+  display:flex;align-items:center;gap:6px;
+}
+.dev-picker-item:last-child{border-bottom:none}
+.dev-picker-item:hover,.dev-picker-item.active{background:var(--accent-glow)}
+.dev-picker-item.active{border-left:3px solid var(--accent)}
+.dev-picker-dot{
+  width:7px;height:7px;border-radius:50%;flex-shrink:0;
+}
+.dev-picker-dot.on{background:var(--green)}
+.dev-picker-dot.off{background:var(--red);opacity:.5}
+.dev-picker-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text)}
+.dev-picker-mac{font-size:.6rem;color:var(--text-secondary);font-family:'Cascadia Code','Fira Code',monospace}
+.dev-picker-empty{padding:10px;font-size:.7rem;color:var(--text-secondary);text-align:center}
+
 /* ===== Mobile ===== */
 @media(max-width:768px){
   .sidebar{transform:translateX(-100%);width:270px;transition:transform .3s ease,background .3s}
@@ -398,6 +602,7 @@ input[type=range]::-moz-range-progress{
 @media(max-width:480px){
   .effects-grid{grid-template-columns:repeat(2,1fr)}
   .tele-dashboard{grid-template-columns:1fr}
+  .settings-grid{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -408,8 +613,8 @@ input[type=range]::-moz-range-progress{
   <div class="sidebar-brand">
     <svg class="brand-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
     <div class="brand-text">
-      <h1>Control Center</h1>
-      <span>IoT Device Manager</span>
+      <h1 data-i18n="brand_title">Control Center</h1>
+      <span data-i18n="brand_sub">IoT Device Manager</span>
     </div>
     <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" title="Toggle sidebar">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
@@ -417,25 +622,41 @@ input[type=range]::-moz-range-progress{
   </div>
 
   <div class="sidebar-section">
-    <div class="sidebar-section-label">Status</div>
+    <div class="sidebar-section-label" data-i18n="sidebar_status">Status</div>
     <div class="status-badges">
       <div class="badge broker-off" id="brokerBadge"><span class="dot"></span><span class="badge-label" id="brokerText">Broker</span></div>
-      <div class="badge offline" id="deviceBadge"><span class="dot"></span><span class="badge-label" id="deviceText">Device</span></div>
+      <div class="badge offline" id="deviceBadge"><span class="dot"></span><span class="badge-label" id="deviceText">Devices</span><span class="badge-count" id="deviceCount">0</span></div>
+    </div>
+  </div>
+
+  <div class="sidebar-section" id="deviceSelectorSection">
+    <div class="sidebar-section-label" data-i18n="sidebar_device">Device</div>
+    <div class="dev-picker" id="devPicker">
+      <div class="dev-picker-field">
+        <input type="text" class="dev-picker-input" id="devPickerInput" placeholder="Search device..." autocomplete="off"
+          onfocus="openDevPicker()" oninput="filterDevPicker()">
+        <button class="dev-picker-arrow" id="devPickerArrow" onclick="toggleDevPicker()">&#x25BE;</button>
+      </div>
+      <div class="dev-picker-dd" id="devPickerDd"></div>
     </div>
   </div>
 
   <nav class="sidebar-nav">
     <button class="nav-link active" data-page="pageControl" onclick="showPage('pageControl',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-      <span class="nav-label">Control</span>
+      <span class="nav-label" data-i18n="nav_control">Control</span>
     </button>
     <button class="nav-link" data-page="pageTelemetry" onclick="showPage('pageTelemetry',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-      <span class="nav-label">Telemetry</span>
+      <span class="nav-label" data-i18n="nav_telemetry">Telemetry</span>
     </button>
     <button class="nav-link" data-page="pageLogs" onclick="showPage('pageLogs',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
-      <span class="nav-label">Logs</span>
+      <span class="nav-label" data-i18n="nav_logs">Logs</span>
+    </button>
+    <button class="nav-link" data-page="pageSettings" onclick="showPage('pageSettings',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span class="nav-label" data-i18n="nav_settings">Settings</span>
     </button>
   </nav>
 
@@ -446,7 +667,11 @@ input[type=range]::-moz-range-progress{
       <svg id="themeIconSun" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
       <span class="theme-label" id="themeLabel">Light mode</span>
     </button>
-    <div class="sidebar-version">v2.1</div>
+    <button class="theme-toggle" id="langToggle" onclick="toggleLang()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      <span class="theme-label" id="langLabel">Espa&ntilde;ol</span>
+    </button>
+    <div class="sidebar-version">v3.0</div>
   </div>
 </aside>
 
@@ -460,19 +685,20 @@ input[type=range]::-moz-range-progress{
   <div class="page active" id="pageControl">
     <div class="page-header">
       <div>
-        <div class="breadcrumb"><span class="bc-root">Dashboard</span><span class="bc-sep">/</span><span class="bc-current">Control Panel</span></div>
-        <div class="page-title">Device Control</div>
+        <div class="breadcrumb"><span class="bc-root" data-i18n="bc_dashboard">Dashboard</span><span class="bc-sep">/</span><span class="bc-current" data-i18n="bc_control">Control Panel</span></div>
+        <div class="page-title" data-i18n="page_control">Device Control</div>
       </div>
     </div>
 
+    <div class="section-header" data-i18n="ctrl_brightness">Brightness <span class="info-tip" data-tip="LED brightness level (0-100%). Sent to device in real time">?</span></div>
     <div class="brightness-section">
       <div class="brightness-control">
-        <label><span>Brightness</span><span id="briVal">100%</span></label>
+        <label><span data-i18n="ctrl_level">Level</span><span id="briVal">100%</span></label>
         <input type="range" id="briSlider" min="0" max="100" value="100">
       </div>
     </div>
 
-    <div class="section-header">Effects</div>
+    <div class="section-header" data-i18n="ctrl_effects">Effects <span class="info-tip" data-tip="Click an effect to activate it on the selected device. Active effect shows a glowing badge">?</span></div>
     <div class="effects-grid">
       <div class="fx-card active" data-cmd="on" onclick="sendFx(this)">
         <span class="fx-badge"></span>
@@ -515,14 +741,24 @@ input[type=range]::-moz-range-progress{
         <div class="name">Fade Out</div>
       </div>
     </div>
+
+    <!-- Morse Transmitter -->
+    <div class="morse-section">
+      <div class="section-header" data-i18n="ctrl_morse">Morse Transmitter <span class="info-tip" data-tip="Type text and press Send to transmit as Morse code via the LED">?</span></div>
+      <div class="morse-row">
+        <input type="text" class="morse-input" id="morseInput" data-i18n-ph="ph_morse" placeholder="Enter text to transmit..." maxlength="100">
+        <button class="morse-btn" onclick="sendMorse()" data-i18n="btn_send">Send</button>
+      </div>
+      <div class="morse-status" id="morseStatus"></div>
+    </div>
   </div>
 
   <!-- PAGE: Telemetry -->
   <div class="page" id="pageTelemetry">
     <div class="page-header">
       <div>
-        <div class="breadcrumb"><span class="bc-root">Dashboard</span><span class="bc-sep">/</span><span class="bc-current">Telemetry</span></div>
-        <div class="page-title">Device Telemetry</div>
+        <div class="breadcrumb"><span class="bc-root" data-i18n="bc_dashboard">Dashboard</span><span class="bc-sep">/</span><span class="bc-current" data-i18n="nav_telemetry">Telemetry</span></div>
+        <div class="page-title" data-i18n="page_telemetry">Device Telemetry</div>
       </div>
       <div class="page-actions">
         <span style="font-size:.65rem;color:var(--text-secondary);font-variant-numeric:tabular-nums" id="teleUpdated">Last updated: --</span>
@@ -547,7 +783,7 @@ input[type=range]::-moz-range-progress{
             <span class="gauge-unit" id="tRam">-- KB</span>
           </div>
         </div>
-        <div class="gauge-label">Free RAM</div>
+        <div class="gauge-label"><span data-i18n="tele_ram">Free RAM</span> <span class="info-tip" data-tip="Available heap memory on the ESP32. Low values may cause instability">?</span></div>
       </div>
 
       <!-- Gauge: Flash -->
@@ -563,7 +799,7 @@ input[type=range]::-moz-range-progress{
             <span class="gauge-unit" id="tFlash">-- KB</span>
           </div>
         </div>
-        <div class="gauge-label">Flash Used</div>
+        <div class="gauge-label"><span data-i18n="tele_flash">Flash Used</span> <span class="info-tip" data-tip="Internal flash storage usage. Includes firmware, config, and log files">?</span></div>
       </div>
 
       <!-- Gauge: Temp -->
@@ -579,15 +815,16 @@ input[type=range]::-moz-range-progress{
             <span class="gauge-unit">&deg;C</span>
           </div>
         </div>
-        <div class="gauge-label">MCU Temp</div>
+        <div class="gauge-label"><span data-i18n="tele_temp">MCU Temp</span> <span class="info-tip" data-tip="Internal temperature of the ESP32 microcontroller. Above 60 C may indicate overheating">?</span></div>
       </div>
 
       <!-- Stat: RSSI -->
       <div class="stat-card">
         <div class="stat-icon icon-rssi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg></div>
         <div class="stat-info">
-          <div class="stat-label">WiFi RSSI</div>
+          <div class="stat-label"><span data-i18n="tele_rssi">WiFi RSSI</span> <span class="info-tip" data-tip="Signal strength in dBm. -30 is excellent, -70 is weak, below -80 may drop packets">?</span></div>
           <div class="stat-value" id="tRssi">-- dBm</div>
+          <div class="stat-value-small" id="tSsid">--</div>
           <div class="stat-bar"><div class="stat-bar-fill bar-rssi" id="tRssiBar" style="width:0"></div></div>
         </div>
       </div>
@@ -596,7 +833,7 @@ input[type=range]::-moz-range-progress{
       <div class="stat-card">
         <div class="stat-icon icon-uptime"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
         <div class="stat-info">
-          <div class="stat-label">Uptime</div>
+          <div class="stat-label"><span data-i18n="tele_uptime">Uptime</span> <span class="info-tip" data-tip="Time since last device boot or reset">?</span></div>
           <div class="stat-value" id="tUptime">--</div>
         </div>
       </div>
@@ -605,8 +842,36 @@ input[type=range]::-moz-range-progress{
       <div class="stat-card">
         <div class="stat-icon icon-ip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
         <div class="stat-info">
-          <div class="stat-label">IP Address</div>
+          <div class="stat-label"><span data-i18n="tele_ip">IP Address</span> <span class="info-tip" data-tip="Local network IP assigned to the device via DHCP">?</span></div>
           <div class="stat-value" id="tIp">--</div>
+        </div>
+      </div>
+
+      <!-- Stat: MAC -->
+      <div class="stat-card">
+        <div class="stat-icon icon-ip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="10" rx="2"/><line x1="6" y1="11" x2="6" y2="13"/><line x1="10" y1="11" x2="10" y2="13"/><line x1="14" y1="11" x2="14" y2="13"/><line x1="18" y1="11" x2="18" y2="13"/></svg></div>
+        <div class="stat-info">
+          <div class="stat-label"><span data-i18n="tele_mac">MAC Address</span> <span class="info-tip" data-tip="Unique hardware identifier of the ESP32 WiFi interface">?</span></div>
+          <div class="stat-value stat-value-mac" id="tMac">--</div>
+        </div>
+      </div>
+
+      <!-- Stat: Firmware -->
+      <div class="stat-card">
+        <div class="stat-icon icon-boot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6v6H9z"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 15h3M1 9h3M1 15h3"/></svg></div>
+        <div class="stat-info">
+          <div class="stat-label"><span data-i18n="tele_fw">Firmware</span> <span class="info-tip" data-tip="Firmware version running on the device">?</span></div>
+          <div class="stat-value" id="tFwVersion">--</div>
+          <div class="stat-value-small" style="margin-top:2px;color:var(--text-secondary);font-size:.65rem" id="tDeviceName"></div>
+        </div>
+      </div>
+
+      <!-- Stat: MQTT Latency -->
+      <div class="stat-card">
+        <div class="stat-icon icon-latency"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        <div class="stat-info">
+          <div class="stat-label"><span data-i18n="tele_latency">MQTT Latency</span> <span class="info-tip" data-tip="Time between consecutive telemetry messages. Depends on the telemetry interval setting">?</span></div>
+          <div class="stat-value" id="tLatency">-- ms</div>
         </div>
       </div>
     </div>
@@ -616,8 +881,8 @@ input[type=range]::-moz-range-progress{
   <div class="page" id="pageLogs">
     <div class="page-header">
       <div>
-        <div class="breadcrumb"><span class="bc-root">Dashboard</span><span class="bc-sep">/</span><span class="bc-current">Event Logs</span></div>
-        <div class="page-title">Event Log</div>
+        <div class="breadcrumb"><span class="bc-root" data-i18n="bc_dashboard">Dashboard</span><span class="bc-sep">/</span><span class="bc-current" data-i18n="bc_logs">Event Logs</span></div>
+        <div class="page-title" data-i18n="page_logs">Event Log</div>
       </div>
       <div class="page-actions">
         <button class="export-btn" onclick="exportLogsCSV()">
@@ -628,6 +893,7 @@ input[type=range]::-moz-range-progress{
     </div>
     <div class="log-page-container">
       <div class="log-toolbar">
+        <span class="info-tip" data-tip="MQTT events for the selected device. Filter by type or export as CSV">?</span>
         <button class="filter-btn active" data-filter="all" onclick="filterLog('all',this)">All</button>
         <button class="filter-btn" data-filter="info" onclick="filterLog('info',this)">Info</button>
         <button class="filter-btn" data-filter="ok" onclick="filterLog('ok',this)">Success</button>
@@ -640,10 +906,109 @@ input[type=range]::-moz-range-progress{
     </div>
   </div>
 
+  <!-- PAGE: Settings -->
+  <div class="page" id="pageSettings">
+    <div class="page-header">
+      <div>
+        <div class="breadcrumb"><span class="bc-root" data-i18n="bc_dashboard">Dashboard</span><span class="bc-sep">/</span><span class="bc-current" data-i18n="nav_settings">Settings</span></div>
+        <div class="page-title" data-i18n="page_settings">Device Settings</div>
+      </div>
+    </div>
+
+    <div class="settings-grid">
+      <!-- WiFi -->
+      <div class="settings-card">
+        <h3>WiFi</h3>
+        <div class="settings-field">
+          <label>SSID <span class="info-tip" data-tip="WiFi network name the device will connect to">?</span></label>
+          <div class="ssid-combo">
+            <input type="text" id="cfgWifiSsid" placeholder="WiFi SSID" autocomplete="off">
+            <button class="ssid-arrow" id="wifiScanBtn" onclick="toggleWifiDropdown()">&#x25BE;</button>
+            <div class="ssid-dropdown" id="wifiDropdown"></div>
+          </div>
+        </div>
+        <div class="settings-field">
+          <label>Password <span class="info-tip" data-tip="WiFi network password">?</span></label>
+          <input type="password" id="cfgWifiPassword" placeholder="WiFi Password">
+        </div>
+      </div>
+
+      <!-- MQTT Broker -->
+      <div class="settings-card">
+        <h3>MQTT Broker</h3>
+        <div class="settings-field">
+          <label>Broker IP <span class="info-tip" data-tip="Mosquitto MQTT broker IP address">?</span></label>
+          <input type="text" id="cfgMqttBroker" placeholder="192.168.1.12">
+        </div>
+        <div class="settings-field">
+          <label>Port <span class="info-tip" data-tip="MQTT broker port (default: 1883)">?</span></label>
+          <div class="num-stepper"><input type="number" id="cfgMqttPort" placeholder="1883" min="1" max="65535"><span class="step-btn step-minus" onclick="stepNum('cfgMqttPort',-1)">&minus;</span><span class="step-btn step-plus" onclick="stepNum('cfgMqttPort',1)">+</span></div>
+        </div>
+      </div>
+
+      <!-- Effect Timings -->
+      <div class="settings-card">
+        <h3 data-i18n="set_timings">Effect Timings (ms)</h3>
+        <div class="settings-field">
+          <label>Breathe Period <span class="info-tip" data-tip="Full breathe cycle duration in milliseconds">?</span></label>
+          <div class="num-stepper"><input type="number" id="cfgBreathePeriod" placeholder="3000" min="100" max="30000"><span class="step-btn step-minus" onclick="stepNum('cfgBreathePeriod',-100)">&minus;</span><span class="step-btn step-plus" onclick="stepNum('cfgBreathePeriod',100)">+</span></div>
+        </div>
+        <div class="settings-field">
+          <label>Blink Period <span class="info-tip" data-tip="Blink on/off cycle duration">?</span></label>
+          <div class="num-stepper"><input type="number" id="cfgBlinkPeriod" placeholder="1000" min="100" max="30000"><span class="step-btn step-minus" onclick="stepNum('cfgBlinkPeriod',-100)">&minus;</span><span class="step-btn step-plus" onclick="stepNum('cfgBlinkPeriod',100)">+</span></div>
+        </div>
+        <div class="settings-field">
+          <label>Strobe Period <span class="info-tip" data-tip="Strobe effect cycle duration">?</span></label>
+          <div class="num-stepper"><input type="number" id="cfgStrobePeriod" placeholder="100" min="20" max="5000"><span class="step-btn step-minus" onclick="stepNum('cfgStrobePeriod',-10)">&minus;</span><span class="step-btn step-plus" onclick="stepNum('cfgStrobePeriod',10)">+</span></div>
+        </div>
+        <div class="settings-field">
+          <label>SOS Unit <span class="info-tip" data-tip="Base dot duration for SOS morse pattern">?</span></label>
+          <div class="num-stepper"><input type="number" id="cfgSosUnit" placeholder="200" min="50" max="2000"><span class="step-btn step-minus" onclick="stepNum('cfgSosUnit',-10)">&minus;</span><span class="step-btn step-plus" onclick="stepNum('cfgSosUnit',10)">+</span></div>
+        </div>
+        <div class="settings-field">
+          <label>Morse Unit <span class="info-tip" data-tip="Base dot duration for free morse">?</span></label>
+          <div class="num-stepper"><input type="number" id="cfgMorseUnit" placeholder="150" min="50" max="1000"><span class="step-btn step-minus" onclick="stepNum('cfgMorseUnit',-10)">&minus;</span><span class="step-btn step-plus" onclick="stepNum('cfgMorseUnit',10)">+</span></div>
+        </div>
+      </div>
+
+      <!-- Telemetry & Dashboard -->
+      <div class="settings-card">
+        <h3 data-i18n="set_tele_dash">Telemetry & Dashboard</h3>
+        <div class="settings-field">
+          <label><span data-i18n="set_device_name">Device Name</span> <span class="info-tip" data-tip="Friendly name for this device. Used in device selector and exports">?</span></label>
+          <input type="text" id="cfgDeviceName" placeholder="My ESP32">
+        </div>
+        <div class="settings-field">
+          <label>Telemetry Interval (s) <span class="info-tip" data-tip="How often the device sends telemetry (seconds)">?</span></label>
+          <div class="num-stepper"><input type="number" id="cfgTelemetryInterval" placeholder="5" min="1" max="300"><span class="step-btn step-minus" onclick="stepNum('cfgTelemetryInterval',-1)">&minus;</span><span class="step-btn step-plus" onclick="stepNum('cfgTelemetryInterval',1)">+</span></div>
+        </div>
+        <div class="settings-field" style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border)">
+          <label>Dashboard MQTT WebSocket URL <span class="info-tip" data-tip="WebSocket URL to connect the dashboard to the MQTT broker">?</span></label>
+          <input type="text" id="cfgBrokerUrl" placeholder="ws://192.168.1.12:9001">
+          <div style="font-size:.6rem;color:var(--text-secondary);margin-top:4px">
+            Used when dashboard is served from ESP32. Saved in browser localStorage.
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="settings-actions">
+        <button class="settings-save" onclick="saveSettings()" data-i18n="btn_save">Save & Apply</button>
+        <button class="settings-cancel" onclick="cancelSettings()" data-i18n="btn_cancel">Cancel</button>
+        <div class="settings-status" id="settingsStatus"></div>
+      </div>
+    </div>
+  </div>
+
 </main>
 
 <script src="https://unpkg.com/mqtt@4.3.8/dist/mqtt.min.js"></script>
 <script>
+// --- i18n (early init for _t) ---
+var _lang=localStorage.getItem('dashboard-lang')||'en';
+var _i18n_data={en:{theme_light:'Light mode',theme_dark:'Dark mode'},es:{theme_light:'Modo claro',theme_dark:'Modo oscuro'}};
+function _t(key){return (_i18n_data[_lang]&&_i18n_data[_lang][key])||(_i18n_data.en&&_i18n_data.en[key])||key;}
+
 // --- Theme ---
 function initTheme(){
   var saved=localStorage.getItem('dashboard-theme');
@@ -665,10 +1030,81 @@ function updateThemeUI(theme){
   var moon=document.getElementById('themeIconMoon');
   var sun=document.getElementById('themeIconSun');
   var label=document.getElementById('themeLabel');
-  if(theme==='dark'){moon.style.display='';sun.style.display='none';label.textContent='Light mode';}
-  else{moon.style.display='none';sun.style.display='';label.textContent='Dark mode';}
+  if(theme==='dark'){moon.style.display='';sun.style.display='none';label.textContent=_t('theme_light');}
+  else{moon.style.display='none';sun.style.display='';label.textContent=_t('theme_dark');}
 }
 initTheme();
+
+// --- i18n (full dictionary) ---
+_i18n_data={
+  en:{
+    brand_title:'Control Center',brand_sub:'IoT Device Manager',
+    sidebar_status:'Status',sidebar_device:'Device',
+    nav_control:'Control',nav_telemetry:'Telemetry',nav_logs:'Logs',nav_settings:'Settings',
+    bc_dashboard:'Dashboard',bc_control:'Control Panel',bc_logs:'Event Logs',
+    page_control:'Device Control',page_telemetry:'Device Telemetry',
+    page_logs:'Event Log',page_settings:'Device Settings',
+    ctrl_brightness:'Brightness',ctrl_level:'Level',
+    ctrl_effects:'Effects',ctrl_morse:'Morse Transmitter',
+    btn_send:'Send',btn_save:'Save & Apply',btn_cancel:'Cancel',
+    ph_morse:'Enter text to transmit...',
+    tele_ram:'Free RAM',tele_flash:'Flash Used',tele_temp:'MCU Temp',
+    tele_rssi:'WiFi RSSI',tele_uptime:'Uptime',tele_ip:'IP Address',
+    tele_mac:'MAC Address',tele_fw:'Firmware',tele_latency:'MQTT Latency',
+    set_timings:'Effect Timings (ms)',set_tele_dash:'Telemetry & Dashboard',
+    set_device_name:'Device Name',
+    theme_light:'Light mode',theme_dark:'Dark mode',
+    lang_label:'English',no_devices:'-- No devices --',
+    ph_search_device:'Search device...'
+  },
+  es:{
+    brand_title:'Centro de Control',brand_sub:'Gestor de Dispositivos IoT',
+    sidebar_status:'Estado',sidebar_device:'Dispositivo',
+    nav_control:'Control',nav_telemetry:'Telemetr\u00EDa',nav_logs:'Registros',nav_settings:'Ajustes',
+    bc_dashboard:'Panel',bc_control:'Panel de Control',bc_logs:'Registros de Eventos',
+    page_control:'Control del Dispositivo',page_telemetry:'Telemetr\u00EDa del Dispositivo',
+    page_logs:'Registro de Eventos',page_settings:'Ajustes del Dispositivo',
+    ctrl_brightness:'Brillo',ctrl_level:'Nivel',
+    ctrl_effects:'Efectos',ctrl_morse:'Transmisor Morse',
+    btn_send:'Enviar',btn_save:'Guardar y Aplicar',btn_cancel:'Cancelar',
+    ph_morse:'Escribe texto para transmitir...',
+    tele_ram:'RAM Libre',tele_flash:'Flash Usado',tele_temp:'Temp MCU',
+    tele_rssi:'WiFi RSSI',tele_uptime:'Tiempo Activo',tele_ip:'Direcci\u00F3n IP',
+    tele_mac:'Direcci\u00F3n MAC',tele_fw:'Firmware',tele_latency:'Latencia MQTT',
+    set_timings:'Tiempos de Efectos (ms)',set_tele_dash:'Telemetr\u00EDa y Dashboard',
+    set_device_name:'Nombre del Dispositivo',
+    theme_light:'Modo claro',theme_dark:'Modo oscuro',
+    lang_label:'Espa\u00F1ol',no_devices:'-- Sin dispositivos --',
+    ph_search_device:'Buscar dispositivo...'
+  }
+};
+function applyLang(){
+  document.querySelectorAll('[data-i18n]').forEach(function(el){
+    var key=el.getAttribute('data-i18n');
+    var txt=_t(key);
+    // Preserve child info-tip spans
+    var tip=el.querySelector('.info-tip');
+    if(tip){el.childNodes[0].textContent=txt+' ';}
+    else{el.textContent=txt;}
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(function(el){
+    el.placeholder=_t(el.getAttribute('data-i18n-ph'));
+  });
+  // Update theme label
+  var theme=document.documentElement.getAttribute('data-theme');
+  document.getElementById('themeLabel').textContent=theme==='dark'?_t('theme_light'):_t('theme_dark');
+  // Update lang button label
+  document.getElementById('langLabel').textContent=_lang==='en'?'Espa\u00F1ol':'English';
+  // Update device picker placeholder
+  var inp=document.getElementById('devPickerInput');
+  if(inp)inp.placeholder=_t('ph_search_device');
+}
+function toggleLang(){
+  _lang=_lang==='en'?'es':'en';
+  localStorage.setItem('dashboard-lang',_lang);
+  applyLang();
+}
+applyLang();
 
 // --- Sidebar ---
 var sidebar=document.getElementById('sidebar');
@@ -699,11 +1135,23 @@ function showPage(pageId,navEl){
 (function(){var s=localStorage.getItem('dashboard-page');if(s&&document.getElementById(s))showPage(s);})();
 
 // --- Constants ---
-const BROKER='ws://'+location.hostname+':9001';
-const T_CMD='xiao_pavas/led/cmd';
-const T_STATUS='xiao_pavas/led/status';
-const T_TELE='xiao_pavas/device/telemetry';
-const T_ONLINE='xiao_pavas/device/online';
+const BROKER_URL=localStorage.getItem('mqtt-broker-url')||('ws://'+location.hostname+':9001');
+
+// Wildcard subscriptions for multi-device
+const SUB_TOPICS=[
+  'd/+/led/status','d/+/device/telemetry','d/+/device/online',
+  'd/+/config/current','d/+/config/ack','d/+/wifi/scan_results'
+];
+
+function parseTopic(topic){
+  var p=topic.split('/');
+  if(p[0]!=='d')return null;
+  return {mac:p[1],suffix:p.slice(2).join('/')};
+}
+
+function pubTopic(suffix){
+  return selectedDevice?'d/'+selectedDevice+'/'+suffix:null;
+}
 
 const $=id=>document.getElementById(id);
 const logEl=$('log');
@@ -711,40 +1159,63 @@ const briSlider=$('briSlider');
 const briVal=$('briVal');
 const cards=document.querySelectorAll('.fx-card');
 
-let state={effect:'none',brightness:100,led_on:false};
+// --- Multi-device state ---
+const devices={};
+let selectedDevice=null;
+
+function getOrCreateDevice(mac){
+  if(!devices[mac]){
+    devices[mac]={
+      mac:mac,name:mac,online:false,
+      state:{effect:'none',brightness:100,led_on:false},
+      telemetry:{},teleHistory:[],logHistory:[],
+      config:null,lastSeen:null
+    };
+    updateDeviceSelector();
+  }
+  return devices[mac];
+}
+
+function activeDevice(){
+  return selectedDevice?devices[selectedDevice]:null;
+}
+
 let autoScroll=true;
 let logFilter='all';
 
 // Gauge circumference: 2*PI*42 = 263.89
 const GAUGE_C=263.89;
 
-// --- Telemetry history for export ---
-let teleHistory=[];
-
-// --- Log history for export ---
-let logHistory=[];
-
 // --- Log ---
-function log(msg,cls){
+function log(msg,cls,mac){
   var ts=new Date().toLocaleTimeString();
-  logHistory.push({time:ts,type:cls||'info',message:msg});
-  if(logHistory.length>500)logHistory.shift();
+  var logEntry={time:ts,type:cls||'info',message:msg};
+  // Store in per-device history if mac provided
+  if(mac&&devices[mac]){
+    devices[mac].logHistory.push(logEntry);
+    if(devices[mac].logHistory.length>500)devices[mac].logHistory.shift();
+    // Only render if this is the selected device or no device specified
+    if(mac!==selectedDevice)return;
+  }
+  _renderLogEntry(logEntry);
+}
 
+function _renderLogEntry(logEntry){
   var entry=document.createElement('div');
-  entry.className='log-entry'+(cls?' log-type-'+cls:'');
-  var time=document.createElement('span');time.className='log-time';time.textContent=ts;
+  entry.className='log-entry'+(logEntry.type?' log-type-'+logEntry.type:'');
+  var time=document.createElement('span');time.className='log-time';time.textContent=logEntry.time;
   var badge=document.createElement('span');badge.className='log-badge';
-  if(cls==='ok'){badge.classList.add('badge-ok');badge.textContent='OK';}
-  else if(cls==='err'){badge.classList.add('badge-err');badge.textContent='ERR';}
+  if(logEntry.type==='ok'){badge.classList.add('badge-ok');badge.textContent='OK';}
+  else if(logEntry.type==='err'){badge.classList.add('badge-err');badge.textContent='ERR';}
   else{badge.classList.add('badge-info');badge.textContent='INFO';}
-  var message=document.createElement('span');message.className='log-msg';message.textContent=msg;
+  var message=document.createElement('span');message.className='log-msg';message.textContent=logEntry.message;
   entry.appendChild(time);entry.appendChild(badge);entry.appendChild(message);
-  if(logFilter!=='all'&&cls!==logFilter)entry.style.display='none';
+  if(logFilter!=='all'&&logEntry.type!==logFilter)entry.style.display='none';
   logEl.prepend(entry);
   if(logEl.children.length>200)logEl.lastChild.remove();
 }
 
-function clearLog(){logEl.innerHTML='';}
+function clearLog(){logEl.textContent='';}
 function toggleAutoScroll(){
   autoScroll=!autoScroll;
   $('autoScrollBtn').textContent='Auto-scroll: '+(autoScroll?'ON':'OFF');
@@ -773,14 +1244,16 @@ function updateFxBadge(){
   document.querySelectorAll('.fx-badge').forEach(function(b){
     b.className='fx-badge';
   });
+  var dev=activeDevice();
+  var st=dev?dev.state:{effect:'none',led_on:false};
   // Determine which effect class to apply on the active card's badge
   var fxClass='';
-  if(!state.led_on){
+  if(!st.led_on){
     fxClass='';// off card has no glow animation
-  } else if(state.effect==='none'){
+  } else if(st.effect==='none'){
     fxClass='fx-on';// solid = gentle breathe
   } else {
-    fxClass='fx-'+state.effect;
+    fxClass='fx-'+st.effect;
   }
   // Find the active card and apply the FX class to its badge
   var activeCard=document.querySelector('.fx-card.active');
@@ -799,95 +1272,52 @@ function highlightCard(cmd){
 }
 
 // --- Status handler ---
-function handleStatus(data){
+function handleStatus(dev,data){
   try{
     var s=JSON.parse(data);
-    state.effect=s.effect||'none';
-    state.brightness=s.brightness!=null?s.brightness:100;
-    state.led_on=!!s.led_on;
-    briSlider.value=state.brightness;briVal.textContent=state.brightness+'%';
-    updateSliderTrack(briSlider);updateFxBadge();
-    if(!state.led_on)highlightCard('off');
-    else if(state.effect==='none')highlightCard('on');
-    else highlightCard(state.effect);
+    dev.state.effect=s.effect||'none';
+    dev.state.brightness=s.brightness!=null?s.brightness:100;
+    dev.state.led_on=!!s.led_on;
+    dev.state.morse_text=s.morse_text||'';
   }catch(e){
     var on=data.trim().toUpperCase()==='ON';
-    state.led_on=on;state.effect='none';
-    updateFxBadge();highlightCard(on?'on':'off');
+    dev.state.led_on=on;dev.state.effect='none';
   }
+  if(dev.mac===selectedDevice)renderActiveDevice();
 }
 
 // --- Telemetry handler ---
-function handleTelemetry(data){
+function handleTelemetry(dev,data){
   try{
     var t=JSON.parse(data);
+    dev.telemetry=t;
+    dev.lastSeen=Date.now();
+    if(t.device_name)dev.name=t.device_name;
     var row={time:new Date().toLocaleTimeString()};
-
-    // RSSI
-    var rssi=t.rssi||0;row.rssi=rssi;
-    $('tRssi').textContent=rssi+' dBm';
-    var rssiPct=Math.max(0,Math.min(100,((rssi+100)/70)*100));
-    $('tRssiBar').style.width=rssiPct+'%';
-
-    // Uptime
-    var ut=t.uptime||0;row.uptime=ut;
-    var h=Math.floor(ut/3600),m=Math.floor((ut%3600)/60),s=ut%60;
-    $('tUptime').textContent=h+'h '+m+'m '+s+'s';
-
-    // RAM
-    var ram=t.free_ram||0;row.free_ram=ram;
-    var ramKb=(ram/1024).toFixed(1);
-    $('tRam').textContent=ramKb+' KB';
-    var ramPct=Math.min(100,(ram/(512*1024))*100);
-    $('tRamPct').textContent=Math.round(ramPct)+'%';
-    setGauge('gaugeRam',ramPct);
-
-    // Flash
+    row.rssi=t.rssi||0;row.uptime=t.uptime||0;row.free_ram=t.free_ram||0;
     var fsTotal=t.fs_total||1,fsFree=t.fs_free||0;
-    var fsUsed=fsTotal-fsFree;
-    row.fs_used=fsUsed;row.fs_total=fsTotal;
-    var fsUsedKb=(fsUsed/1024).toFixed(1),fsTotalKb=(fsTotal/1024).toFixed(1);
-    $('tFlash').textContent=fsUsedKb+'/'+fsTotalKb+' KB';
-    var fsPct=Math.min(100,(fsUsed/fsTotal)*100);
-    $('tFlashPct').textContent=Math.round(fsPct)+'%';
-    setGauge('gaugeFlash',fsPct);
-    // Color flash gauge based on usage
-    var flashGauge=$('gaugeFlash');
-    if(fsPct>85)flashGauge.style.stroke='var(--red)';
-    else if(fsPct>60)flashGauge.style.stroke='var(--orange)';
-    else flashGauge.style.stroke='var(--cyan)';
-
-    // Temp
-    if(t.temp_c!=null){
-      row.temp_c=t.temp_c;
-      $('tTemp').textContent=t.temp_c;
-      var tc=t.temp_c;
-      var tempColor;
-      if(tc<30)tempColor='var(--accent)';
-      else if(tc<45)tempColor='var(--green)';
-      else if(tc<60)tempColor='var(--orange)';
-      else tempColor='var(--red)';
-      var tempPct=Math.max(0,Math.min(100,((tc-10)/80)*100));
-      setGauge('gaugeTemp',tempPct);
-      $('gaugeTemp').style.stroke=tempColor;
-      $('tTemp').style.color=tempColor;
-    }
-
-    // IP
-    $('tIp').textContent=t.ip||'--';
-    row.ip=t.ip||'';
-
-    $('teleUpdated').textContent='Last updated: '+new Date().toLocaleTimeString();
-
-    teleHistory.push(row);
-    if(teleHistory.length>1000)teleHistory.shift();
-  }catch(e){}
+    row.fs_used=fsTotal-fsFree;row.fs_total=fsTotal;
+    row.temp_c=t.temp_c||0;row.ip=t.ip||'';
+    dev.teleHistory.push(row);
+    if(dev.teleHistory.length>1000)dev.teleHistory.shift();
+    updateDeviceSelector();
+    if(dev.mac===selectedDevice)renderTelemetry(dev);
+  }catch(e){console.warn('Telemetry parse error:',e);}
 }
 
 // --- Online/Offline ---
-function setDeviceOnline(online){
-  $('deviceBadge').className='badge '+(online?'online':'offline');
-  $('deviceText').textContent=online?'Online':'Offline';
+function updateDeviceBadge(){
+  var count=0;
+  for(var mac in devices){if(devices[mac].online)count++;}
+  $('deviceCount').textContent=count;
+  var hasOnline=count>0;
+  $('deviceBadge').className='badge '+(hasOnline?'online':'offline');
+  $('deviceText').textContent='Devices';
+  // Update selected device badge in sidebar
+  var dev=activeDevice();
+  if(dev){
+    $('deviceBadge').className='badge '+(dev.online?'online':'offline');
+  }
 }
 function setBrokerConnected(ok){
   $('brokerBadge').className='badge '+(ok?'broker':'broker-off');
@@ -898,22 +1328,48 @@ function setBrokerConnected(ok){
 
 // --- MQTT ---
 log('Connecting to broker...','info');
-const client=mqtt.connect(BROKER,{
+const client=mqtt.connect(BROKER_URL,{
   clientId:'web_fx_'+Math.random().toString(16).slice(2,8),
   clean:true,reconnectPeriod:3000
 });
 client.on('connect',function(){
   setBrokerConnected(true);log('Connected to MQTT broker','ok');
-  client.subscribe([T_STATUS,T_TELE,T_ONLINE]);log('Subscribed to topics','ok');
+  client.subscribe(SUB_TOPICS);log('Subscribed to wildcard topics','ok');
 });
 client.on('message',function(topic,msg){
-  var t=topic.toString(),val=msg.toString();
-  if(t===T_STATUS){handleStatus(val);log('Status: '+val,'ok');}
-  else if(t===T_TELE){handleTelemetry(val);}
-  else if(t===T_ONLINE){
-    var online=val.trim().toLowerCase()==='online';
-    setDeviceOnline(online);
-    log('Device: '+(online?'ONLINE':'OFFLINE'),online?'ok':'err');
+  var p=parseTopic(topic.toString());
+  if(!p)return;
+  var dev=getOrCreateDevice(p.mac);
+  var val=msg.toString();
+  dev.lastSeen=Date.now();
+
+  switch(p.suffix){
+    case 'led/status':
+      handleStatus(dev,val);
+      log('Status: '+val,'ok',p.mac);
+      break;
+    case 'device/telemetry':
+      handleTelemetry(dev,val);
+      break;
+    case 'device/online':
+      var online=val.trim().toLowerCase()==='online';
+      dev.online=online;
+      updateDeviceBadge();
+      updateDeviceSelector();
+      log('Device '+(dev.name||p.mac)+': '+(online?'ONLINE':'OFFLINE'),online?'ok':'err',p.mac);
+      // Auto-select first online device if none selected
+      if(online&&!selectedDevice)selectDevice(p.mac);
+      if(dev.mac===selectedDevice)renderActiveDevice();
+      break;
+    case 'config/current':
+      handleConfigCurrent(dev,val);
+      break;
+    case 'config/ack':
+      handleConfigAck(dev,val);
+      break;
+    case 'wifi/scan_results':
+      if(dev.mac===selectedDevice)handleWifiScanResults(val);
+      break;
   }
 });
 client.on('offline',function(){setBrokerConnected(false);log('Broker disconnected','err');});
@@ -921,18 +1377,28 @@ client.on('error',function(err){log('Error: '+err.message,'err');});
 
 // --- Optimistic UI ---
 function applyOptimistic(cmd){
-  if(cmd==='on'){state.led_on=true;state.effect='none';}
-  else if(cmd==='off'){state.led_on=false;state.effect='none';}
-  else if(cmd==='toggle'){state.led_on=!state.led_on;state.effect='none';}
+  var dev=activeDevice();
+  if(!dev)return;
+  var st=dev.state;
+  if(cmd==='on'){st.led_on=true;st.effect='none';}
+  else if(cmd==='off'){st.led_on=false;st.effect='none';}
+  else if(cmd==='toggle'){st.led_on=!st.led_on;st.effect='none';}
   else if(['breathe','blink','strobe','sos','fade_in','fade_out'].includes(cmd)){
-    state.led_on=true;state.effect=cmd;
+    st.led_on=true;st.effect=cmd;
+  }
+  else if(cmd.startsWith('morse:')){
+    st.led_on=true;st.effect='morse';
   }
   updateFxBadge();
-  if(!state.led_on)highlightCard('off');
-  else if(state.effect==='none')highlightCard('on');
-  else highlightCard(state.effect);
+  if(!st.led_on)highlightCard('off');
+  else if(st.effect==='none')highlightCard('on');
+  else highlightCard(st.effect);
 }
-function send(cmd){client.publish(T_CMD,cmd);log('Sent: '+cmd,'info');}
+function send(cmd){
+  if(!selectedDevice)return;
+  var t=pubTopic('led/cmd');
+  if(t){client.publish(t,cmd);log('Sent: '+cmd,'info',selectedDevice);}
+}
 function sendFx(el){var cmd=el.dataset.cmd;applyOptimistic(cmd);send(cmd);}
 
 // --- Brightness slider ---
@@ -945,7 +1411,8 @@ function updateSliderTrack(slider){
 var briTimeout=null;
 briSlider.addEventListener('input',function(){
   var v=this.value;briVal.textContent=v+'%';
-  state.brightness=parseInt(v);updateFxBadge();updateSliderTrack(this);
+  var dev=activeDevice();if(dev)dev.state.brightness=parseInt(v);
+  updateFxBadge();updateSliderTrack(this);
   if(briTimeout)clearTimeout(briTimeout);
   briTimeout=setTimeout(function(){send('brightness:'+v);},150);
 });
@@ -960,24 +1427,462 @@ function downloadCSV(filename,csvContent){
 }
 
 function exportTelemetryCSV(){
-  if(teleHistory.length===0){log('No telemetry data to export','err');return;}
+  var dev=activeDevice();
+  if(!dev||dev.teleHistory.length===0){log('No telemetry data to export','err');return;}
+  var devLabel=(dev.name||dev.mac).replace(/[^a-zA-Z0-9_-]/g,'_');
   var headers='Time,RSSI (dBm),Uptime (s),Free RAM (bytes),Flash Used (bytes),Flash Total (bytes),Temp (C),IP\n';
-  var rows=teleHistory.map(function(r){
+  var rows=dev.teleHistory.map(function(r){
     return [r.time,r.rssi||'',r.uptime||'',r.free_ram||'',r.fs_used||'',r.fs_total||'',r.temp_c||'',r.ip||''].join(',');
   }).join('\n');
-  downloadCSV('telemetry_'+new Date().toISOString().slice(0,10)+'.csv',headers+rows);
-  log('Exported '+teleHistory.length+' telemetry records','ok');
+  downloadCSV('telemetry_'+devLabel+'_'+new Date().toISOString().slice(0,10)+'.csv',headers+rows);
+  log('Exported '+dev.teleHistory.length+' telemetry records','ok');
 }
 
 function exportLogsCSV(){
-  if(logHistory.length===0){log('No logs to export','err');return;}
+  var dev=activeDevice();
+  if(!dev||dev.logHistory.length===0){log('No logs to export','err');return;}
+  var devLabel=(dev.name||dev.mac).replace(/[^a-zA-Z0-9_-]/g,'_');
   var headers='Time,Type,Message\n';
-  var rows=logHistory.map(function(r){
+  var rows=dev.logHistory.map(function(r){
     return [r.time,r.type,'"'+r.message.replace(/"/g,'""')+'"'].join(',');
   }).join('\n');
-  downloadCSV('logs_'+new Date().toISOString().slice(0,10)+'.csv',headers+rows);
-  log('Exported '+logHistory.length+' log entries','ok');
+  downloadCSV('logs_'+devLabel+'_'+new Date().toISOString().slice(0,10)+'.csv',headers+rows);
+  log('Exported '+dev.logHistory.length+' log entries','ok');
 }
+
+// --- Morse ---
+function sendMorse(){
+  var input=$('morseInput');
+  var text=input.value.trim();
+  if(!text)return;
+  var cmd='morse:'+text;
+  applyOptimistic(cmd);
+  send(cmd);
+  $('morseStatus').textContent='Sending: '+text;
+  input.value='';
+}
+$('morseInput').addEventListener('keydown',function(e){if(e.key==='Enter')sendMorse();});
+
+// --- Config/Settings ---
+var _cfgFields={
+  device_name:'cfgDeviceName',
+  wifi_ssid:'cfgWifiSsid', wifi_password:'cfgWifiPassword',
+  mqtt_broker:'cfgMqttBroker', mqtt_port:'cfgMqttPort',
+  breathe_period_ms:'cfgBreathePeriod', blink_period_ms:'cfgBlinkPeriod',
+  strobe_period_ms:'cfgStrobePeriod', sos_unit_ms:'cfgSosUnit',
+  morse_unit_ms:'cfgMorseUnit', telemetry_interval_s:'cfgTelemetryInterval'
+};
+
+function handleConfigCurrent(dev,data){
+  try{
+    var cfg=JSON.parse(data);
+    dev.config=cfg;
+    // Remember current WiFi password
+    if(cfg.wifi_ssid&&cfg.wifi_password){
+      saveWifiPassword(cfg.wifi_ssid,cfg.wifi_password);
+    }
+    log('Config loaded from device','ok',dev.mac);
+    if(dev.mac===selectedDevice)renderSettings(dev);
+  }catch(e){console.warn('Config parse error:',e);}
+}
+
+function cancelSettings(){
+  var dev=activeDevice();
+  if(dev&&dev.config){
+    for(var key in _cfgFields){
+      var el=$(_cfgFields[key]);
+      if(el)el.value=dev.config[key]!=null?dev.config[key]:'';
+    }
+    log('Settings reverted','info');
+  }
+  $('settingsStatus').textContent='';
+  $('settingsStatus').className='settings-status';
+}
+
+function handleConfigAck(dev,data){
+  try{
+    var ack=JSON.parse(data);
+    if(dev.mac!==selectedDevice)return;
+    var statusEl=$('settingsStatus');
+    if(ack.restarting){
+      statusEl.textContent='\u26A0 Device is restarting \u2014 please wait\u2026';
+      statusEl.className='settings-status restarting';
+      log('Config applied, device restarting','info',dev.mac);
+    } else if(ack.success){
+      statusEl.textContent='Settings applied successfully';
+      statusEl.className='settings-status success';
+      log('Config applied','ok',dev.mac);
+    } else {
+      statusEl.textContent='Errors: '+(ack.errors||[]).join(', ');
+      statusEl.className='settings-status error';
+      log('Config errors: '+(ack.errors||[]).join(', '),'err',dev.mac);
+    }
+    if(ack.errors&&ack.errors.length&&ack.success){
+      statusEl.textContent+=' (with warnings: '+(ack.errors).join(', ')+')';
+    }
+    setTimeout(function(){statusEl.textContent='';statusEl.className='settings-status';},8000);
+  }catch(e){console.warn('Config ACK parse error:',e);}
+}
+
+function stepNum(id,delta){
+  var el=$(id);if(!el)return;
+  var v=parseInt(el.value)||parseInt(el.placeholder)||0;
+  var mn=parseInt(el.min),mx=parseInt(el.max);
+  v+=delta;
+  if(!isNaN(mn)&&v<mn)v=mn;
+  if(!isNaN(mx)&&v>mx)v=mx;
+  el.value=v;
+}
+
+function saveSettings(){
+  if(!selectedDevice)return;
+  var payload={};
+  for(var key in _cfgFields){
+    var el=$(_cfgFields[key]);
+    if(!el)continue;
+    var val=el.value.trim();
+    if(val==='')continue;
+    payload[key]=val;
+  }
+  // Remember WiFi password in localStorage
+  var ssid=$('cfgWifiSsid').value.trim();
+  var pw=$('cfgWifiPassword').value.trim();
+  if(ssid&&pw)saveWifiPassword(ssid,pw);
+  // Save broker URL to localStorage (dashboard-side only)
+  var brokerUrlVal=$('cfgBrokerUrl').value.trim();
+  if(brokerUrlVal){
+    localStorage.setItem('mqtt-broker-url',brokerUrlVal);
+    log('Broker URL saved to localStorage','ok');
+  }
+  if(Object.keys(payload).length>0){
+    var t=pubTopic('config/set');
+    if(t){
+      client.publish(t,JSON.stringify(payload));
+      $('settingsStatus').textContent='Saving...';
+      $('settingsStatus').className='settings-status';
+      log('Config sent to device','info',selectedDevice);
+    }
+  }
+}
+
+// --- WiFi password memory (localStorage) ---
+function _getWifiPasswords(){
+  try{return JSON.parse(localStorage.getItem('wifi-passwords'))||{};}catch(e){return {};}
+}
+function saveWifiPassword(ssid,pw){
+  var map=_getWifiPasswords();map[ssid]=pw;
+  localStorage.setItem('wifi-passwords',JSON.stringify(map));
+}
+function getWifiPassword(ssid){return _getWifiPasswords()[ssid]||'';}
+
+// --- WiFi Scan Combobox ---
+var _scanTimeout=null;
+var _AUTH_LABELS=['Open','WEP','WPA','WPA2','WPA/WPA2'];
+var _dropdownOpen=false;
+
+function toggleWifiDropdown(){
+  var dd=$('wifiDropdown');
+  if(_dropdownOpen){
+    dd.classList.remove('open');_dropdownOpen=false;return;
+  }
+  dd.textContent='';
+  var scanMsg=document.createElement('div');
+  scanMsg.className='ssid-dropdown-msg';scanMsg.textContent='Scanning\u2026';
+  dd.appendChild(scanMsg);
+  dd.classList.add('open');_dropdownOpen=true;
+  var wt=pubTopic('wifi/scan');
+  if(wt)client.publish(wt,'');
+  log('WiFi scan requested','info');
+  if(_scanTimeout)clearTimeout(_scanTimeout);
+  _scanTimeout=setTimeout(function(){
+    dd.textContent='';
+    var tmsg=document.createElement('div');
+    tmsg.className='ssid-dropdown-msg';tmsg.textContent='No response \u2014 try again';
+    dd.appendChild(tmsg);
+    log('WiFi scan timeout','err');
+  },10000);
+}
+
+function handleWifiScanResults(data){
+  if(_scanTimeout){clearTimeout(_scanTimeout);_scanTimeout=null;}
+  var dd=$('wifiDropdown');
+  try{
+    var nets=JSON.parse(data);
+    if(!nets.length){
+      dd.textContent='';
+      var noMsg=document.createElement('div');
+      noMsg.className='ssid-dropdown-msg';noMsg.textContent='No networks found';
+      dd.appendChild(noMsg);
+      log('WiFi scan: 0 networks','info');return;
+    }
+    var saved=_getWifiPasswords();
+    dd.textContent='';
+    nets.forEach(function(n){
+      var authLabel=_AUTH_LABELS[n.auth]||'Auth:'+n.auth;
+      var hasPw=saved[n.ssid]?true:false;
+      var item=document.createElement('div');
+      item.className='ssid-dropdown-item';
+      var nameSpan=document.createElement('span');
+      nameSpan.className='net-name';
+      nameSpan.textContent=n.ssid+(hasPw?' \u2713':'');
+      var metaSpan=document.createElement('span');
+      metaSpan.className='net-meta';
+      metaSpan.textContent=n.rssi+' dBm \u00B7 '+authLabel;
+      item.appendChild(nameSpan);
+      item.appendChild(metaSpan);
+      item.onclick=function(){selectNetwork(n.ssid);};
+      dd.appendChild(item);
+    });
+    dd.classList.add('open');_dropdownOpen=true;
+    log('WiFi scan: '+nets.length+' networks found','ok');
+  }catch(e){
+    dd.textContent='';
+    var errMsg=document.createElement('div');
+    errMsg.className='ssid-dropdown-msg';errMsg.textContent='Parse error';
+    dd.appendChild(errMsg);
+    log('WiFi scan parse error','err');
+  }
+}
+
+function selectNetwork(ssid){
+  $('cfgWifiSsid').value=ssid;
+  var dd=$('wifiDropdown');dd.classList.remove('open');_dropdownOpen=false;
+  var pw=getWifiPassword(ssid);
+  $('cfgWifiPassword').value=pw;
+  if(pw)log('Password auto-filled for '+ssid,'ok');
+  log('Selected network: '+ssid,'ok');
+}
+
+// Close dropdown on outside click
+document.addEventListener('click',function(e){
+  var combo=document.querySelector('.ssid-combo');
+  if(combo&&!combo.contains(e.target)){
+    $('wifiDropdown').classList.remove('open');_dropdownOpen=false;
+  }
+});
+
+// --- Device picker ---
+var _devPickerOpen=false;
+
+function _sortedDeviceMacs(){
+  var macs=Object.keys(devices);
+  macs.sort(function(a,b){
+    if(devices[a].online!==devices[b].online)return devices[b].online?1:-1;
+    return (devices[a].name||a).localeCompare(devices[b].name||b);
+  });
+  return macs;
+}
+
+function updateDeviceSelector(){
+  updateDeviceBadge();
+  // Update input display if not focused
+  var inp=$('devPickerInput');
+  if(document.activeElement!==inp&&selectedDevice&&devices[selectedDevice]){
+    var d=devices[selectedDevice];
+    inp.value=(d.name!==d.mac?d.name+' ':'')+d.mac;
+  }
+  if(_devPickerOpen)filterDevPicker();
+}
+
+function _renderDevList(macs){
+  var dd=$('devPickerDd');
+  dd.textContent='';
+  if(macs.length===0){
+    var emptyMsg=document.createElement('div');
+    emptyMsg.className='dev-picker-empty';emptyMsg.textContent=_t('no_devices');
+    dd.appendChild(emptyMsg);
+    return;
+  }
+  macs.forEach(function(mac){
+    var d=devices[mac];
+    var item=document.createElement('div');
+    item.className='dev-picker-item'+(mac===selectedDevice?' active':'');
+    var dot=document.createElement('span');
+    dot.className='dev-picker-dot '+(d.online?'on':'off');
+    var name=document.createElement('span');
+    name.className='dev-picker-name';
+    name.textContent=d.name||mac;
+    var macLabel=document.createElement('span');
+    macLabel.className='dev-picker-mac';
+    macLabel.textContent=mac;
+    item.appendChild(dot);
+    item.appendChild(name);
+    if(d.name&&d.name!==mac)item.appendChild(macLabel);
+    item.onclick=function(){selectDevice(mac);closeDevPicker();};
+    dd.appendChild(item);
+  });
+}
+
+function filterDevPicker(){
+  var query=$('devPickerInput').value.trim().toLowerCase();
+  var macs=_sortedDeviceMacs();
+  if(query){
+    macs=macs.filter(function(mac){
+      var d=devices[mac];
+      return mac.toLowerCase().indexOf(query)!==-1||
+        (d.name&&d.name.toLowerCase().indexOf(query)!==-1);
+    });
+  }
+  _renderDevList(macs);
+}
+
+function openDevPicker(){
+  _devPickerOpen=true;
+  $('devPickerDd').classList.add('open');
+  $('devPickerArrow').classList.add('open');
+  $('devPickerInput').select();
+  filterDevPicker();
+}
+
+function closeDevPicker(){
+  _devPickerOpen=false;
+  $('devPickerDd').classList.remove('open');
+  $('devPickerArrow').classList.remove('open');
+  // Restore display value
+  var inp=$('devPickerInput');
+  if(selectedDevice&&devices[selectedDevice]){
+    var d=devices[selectedDevice];
+    inp.value=(d.name!==d.mac?d.name+' ':'')+d.mac;
+  } else {
+    inp.value='';
+  }
+}
+
+function toggleDevPicker(){
+  if(_devPickerOpen)closeDevPicker();else openDevPicker();
+}
+
+function selectDevice(mac){
+  if(!mac||!devices[mac])return;
+  selectedDevice=mac;
+  localStorage.setItem('selected-device',mac);
+  updateDeviceBadge();
+  renderActiveDevice();
+  // Update input display
+  var d=devices[mac];
+  $('devPickerInput').value=(d.name!==d.mac?d.name+' ':'')+d.mac;
+}
+
+// Close picker on outside click
+document.addEventListener('click',function(e){
+  var picker=$('devPicker');
+  if(picker&&!picker.contains(e.target))closeDevPicker();
+});
+
+function renderActiveDevice(){
+  var dev=activeDevice();
+  if(!dev)return;
+  // Control tab
+  var st=dev.state;
+  briSlider.value=st.brightness;briVal.textContent=st.brightness+'%';
+  updateSliderTrack(briSlider);
+  if(!st.led_on)highlightCard('off');
+  else if(st.effect==='none'||st.effect==='morse')highlightCard('on');
+  else highlightCard(st.effect);
+  updateFxBadge();
+  // Morse status
+  var morseStatus=$('morseStatus');
+  if(st.morse_text)morseStatus.textContent='Transmitting: '+st.morse_text;
+  else if(st.effect!=='morse')morseStatus.textContent='';
+  // Telemetry
+  renderTelemetry(dev);
+  // Settings
+  renderSettings(dev);
+  // Logs
+  renderLogs(dev);
+  // Device badge
+  updateDeviceBadge();
+}
+
+function renderTelemetry(dev){
+  var t=dev.telemetry;
+  if(!t||!t.rssi&&!t.uptime)return;
+  // RSSI
+  var rssi=t.rssi||0;
+  $('tRssi').textContent=rssi+' dBm';
+  var rssiPct=Math.max(0,Math.min(100,((rssi+100)/70)*100));
+  $('tRssiBar').style.width=rssiPct+'%';
+  if(t.ssid)$('tSsid').textContent=t.ssid;
+  // Uptime
+  var ut=t.uptime||0;
+  var h=Math.floor(ut/3600),m=Math.floor((ut%3600)/60),s=ut%60;
+  $('tUptime').textContent=h+'h '+m+'m '+s+'s';
+  // RAM
+  var ram=t.free_ram||0;
+  var ramKb=(ram/1024).toFixed(1);
+  $('tRam').textContent=ramKb+' KB';
+  var ramPct=Math.min(100,(ram/(512*1024))*100);
+  $('tRamPct').textContent=Math.round(ramPct)+'%';
+  setGauge('gaugeRam',ramPct);
+  // Flash
+  var fsTotal=t.fs_total||1,fsFree=t.fs_free||0;
+  var fsUsed=fsTotal-fsFree;
+  var fsUsedKb=(fsUsed/1024).toFixed(1),fsTotalKb=(fsTotal/1024).toFixed(1);
+  $('tFlash').textContent=fsUsedKb+'/'+fsTotalKb+' KB';
+  var fsPct=Math.min(100,(fsUsed/fsTotal)*100);
+  $('tFlashPct').textContent=Math.round(fsPct)+'%';
+  setGauge('gaugeFlash',fsPct);
+  var flashGauge=$('gaugeFlash');
+  if(fsPct>85)flashGauge.style.stroke='var(--red)';
+  else if(fsPct>60)flashGauge.style.stroke='var(--orange)';
+  else flashGauge.style.stroke='var(--cyan)';
+  // Temp
+  if(t.temp_c!=null){
+    $('tTemp').textContent=t.temp_c;
+    var tc=t.temp_c;
+    var tempColor;
+    if(tc<30)tempColor='var(--accent)';
+    else if(tc<45)tempColor='var(--green)';
+    else if(tc<60)tempColor='var(--orange)';
+    else tempColor='var(--red)';
+    var tempPct=Math.max(0,Math.min(100,((tc-10)/80)*100));
+    setGauge('gaugeTemp',tempPct);
+    $('gaugeTemp').style.stroke=tempColor;
+    $('tTemp').style.color=tempColor;
+  }
+  // IP
+  $('tIp').textContent=t.ip||'--';
+  // MAC
+  if(t.mac)$('tMac').textContent=t.mac;
+  // Device info
+  $('tFwVersion').textContent=t.fw_version?'v'+t.fw_version:'--';
+  var dn=t.device_name||dev.name||'';
+  $('tDeviceName').textContent=(dn&&dn!==dev.mac)?dn:'';
+  // Latency
+  if(!dev._lastTeleMs)dev._lastTeleMs=Date.now();
+  var nowL=Date.now();
+  var latency=nowL-dev._lastTeleMs;
+  dev._lastTeleMs=nowL;
+  if(latency>0&&latency<60000)$('tLatency').textContent=latency+' ms';
+  $('teleUpdated').textContent='Last updated: '+new Date().toLocaleTimeString();
+}
+
+function renderSettings(dev){
+  if(!dev.config)return;
+  for(var key in _cfgFields){
+    var el=$(_cfgFields[key]);
+    if(el&&dev.config[key]!=null)el.value=dev.config[key];
+  }
+}
+
+function renderLogs(dev){
+  logEl.textContent='';
+  if(!dev.logHistory)return;
+  // Render last entries (most recent on top)
+  var entries=dev.logHistory.slice(-200);
+  for(var i=entries.length-1;i>=0;i--){
+    _renderLogEntry(entries[i]);
+  }
+}
+
+// Init broker URL field from localStorage
+(function(){
+  var saved=localStorage.getItem('mqtt-broker-url');
+  if(saved)$('cfgBrokerUrl').value=saved;
+  // Restore selected device
+  var savedDev=localStorage.getItem('selected-device');
+  if(savedDev)selectedDevice=savedDev;
+})();
 
 // Init
 updateFxBadge();

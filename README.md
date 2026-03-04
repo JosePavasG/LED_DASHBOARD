@@ -1,66 +1,87 @@
 # IoT Control Center
 
-Dashboard web profesional para control remoto de un LED con efectos PWM mediante MQTT, usando un **Seeed Studio XIAO ESP32S3** y un broker Mosquitto self-hosted con Docker.
+> Last updated: 2026-03-04
+
+Dashboard web profesional para control remoto de LEDs con efectos PWM mediante MQTT, soportando **N dispositivos ESP32** identificados por MAC. Usa **Seeed Studio XIAO ESP32S3** y un broker Mosquitto self-hosted con Docker.
 
 ## Arquitectura
 
 ```
-┌──────────────┐     MQTT:1883     ┌────────────────┐     WebSocket:9001    ┌──────────────┐
-│  XIAO ESP32  │◄────────────────►│   Mosquitto    │◄──────────────────►│  Dashboard   │
-│  MicroPython │                   │   (Docker)     │   nginx proxy /mqtt  │  (browser)   │
-└──────────────┘                   └────────────────┘                      └──────────────┘
-                                         │
-                                   docker-compose
-                                   ┌─────┴─────┐
-                                   │  nginx    │  :80  →  Dashboard + WS proxy
-                                   └───────────┘
+┌──────────────┐                        ┌────────────────┐                       ┌──────────────┐
+│  XIAO ESP32  │◄──── MQTT:1883 ──────►│   Mosquitto    │◄── WebSocket:9001 ──►│  Dashboard   │
+│  MicroPython │  d/{MAC}/led/cmd ...   │   (Docker)     │   nginx proxy /mqtt   │  (browser)   │
+└──────────────┘                        └────────────────┘                       └──────────────┘
+       ×N                                      │
+                                         docker-compose
+                                         ┌─────┴─────┐
+                                         │  nginx    │  :80 → Dashboard + WS proxy
+                                         └───────────┘
 ```
 
-El microcontrolador se conecta vía WiFi al broker Mosquitto local (puerto 1883). El dashboard web se sirve con nginx y se conecta al broker por WebSocket a través del proxy nginx (`/mqtt` → Mosquitto :9001). Todo corre en Docker Compose.
+Cada dispositivo se identifica por su MAC address (`AA-BB-CC-DD-EE-FF`). El dashboard descubre dispositivos automáticamente via suscripciones wildcard (`d/+/...`).
 
 ## Funcionalidades
 
+### Multi-Device
+- **Auto-discovery** de dispositivos vía MQTT wildcards
+- **Device picker** con búsqueda por nombre o MAC, indicadores online/offline
+- **Badge de conteo** de dispositivos online en el sidebar
+- **Nombre personalizado** configurable desde Settings (persiste en el dispositivo)
+- Todas las pestañas muestran datos del dispositivo seleccionado
+
 ### Device Control
 - **On / Off** del LED con badge de estado animado en el efecto activo
-- **Efectos PWM no-bloqueantes:** breathe, blink, strobe, SOS (morse), fade in, fade out
+- **Efectos PWM no-bloqueantes:** breathe, blink, strobe, SOS, fade in, fade out
+- **Transmisor Morse:** envío de texto libre como código morse por el LED
 - **Control de brillo** 0–100% con curva cuadrática para percepción natural
 
 ### Telemetry Dashboard
 - **Gauges circulares SVG** para RAM libre, Flash usado y temperatura del MCU
-- **Stat cards** para WiFi RSSI (con barra de señal), uptime e IP
-- **Exportar a CSV** con un click
+- **Stat cards** para WiFi RSSI (con barra de señal), uptime, IP, MAC y versión de firmware
+- **Exportar a CSV** con un click (incluye nombre de dispositivo en el archivo)
 
 ### Event Logs
 - Log en tiempo real con badges de tipo (OK / ERR / INFO)
 - **Filtros** por tipo de evento
 - **Auto-scroll** configurable
-- **Exportar a CSV**
+- **Exportar a CSV** por dispositivo
+
+### Remote Settings
+- **Configuración remota** vía MQTT: WiFi, broker, timings de efectos, nombre del dispositivo
+- **Escaneo WiFi** desde el dashboard (dropdown con redes, señal, auto-fill de contraseñas guardadas)
+- **Validación y ACK** del dispositivo con feedback visual (success/error/restarting)
+- **Persistencia** en JSON en el filesystem del ESP32
 
 ### UI/UX
-- **Sidebar colapsable** con navegación por pestañas (Control / Telemetry / Logs)
+- **Sidebar colapsable** con navegación por pestañas (Control / Telemetry / Logs / Settings)
 - **Tema dark/light** con transiciones suaves
-- **Breadcrumbs** en cada página
-- **Animaciones** de entrada, hover y transición en toda la interfaz
+- **Idioma EN/ES** con toggle en el sidebar
+- **Info-tips** (tooltips `?`) en todos los controles con descripción contextual
 - **Diseño responsive** (desktop + mobile con sidebar overlay)
 - **UI optimista:** respuesta visual instantánea antes de confirmación MQTT
-- **LWT (Last Will & Testament):** detección automática de online/offline del dispositivo
+- **LWT (Last Will & Testament):** detección automática de online/offline
 - **Reconexión automática** WiFi y MQTT con watchdog (40s)
 
 ## Estructura del proyecto
 
 ```
 ├── firmware/
-│   ├── main.py              # Firmware MicroPython (lógica LED, WiFi, MQTT)
-│   └── config.py            # Configuración WiFi, MQTT, hardware y efectos
+│   ├── boot.py                # Boot temprano + FW_VERSION (editar aquí para releases)
+│   ├── main.py                # Firmware principal (WiFi, MQTT, LED, telemetría)
+│   ├── config.example.py      # Template de configuración (copiar a config.py)
+│   └── lib/
+│       ├── config_store.py    # Config runtime con persistencia JSON + validación
+│       ├── boot_log.py        # Boot counter + crash log vía NVS
+│       ├── morse.py           # Generador morse no-bloqueante (ITU timing)
+│       └── webserver.py       # HTTP server no-bloqueante para servir dashboard
 ├── web/
-│   └── index.html           # Dashboard web (HTML + CSS + JS, single-file)
+│   └── index.html             # Dashboard web (HTML + CSS + JS, single-file)
 ├── mosquitto/
 │   └── config/
-│       └── mosquitto.conf   # Configuración del broker Mosquitto
+│       └── mosquitto.conf     # Configuración del broker Mosquitto
 ├── nginx/
-│   └── default.conf         # Nginx: sirve dashboard + proxy WebSocket
-├── docker-compose.yml       # Mosquitto + Nginx en Docker
-├── pymakr.conf              # Configuración Pymakr para upload a la placa
+│   └── default.conf           # Nginx: sirve dashboard + proxy WebSocket
+├── docker-compose.yml         # Mosquitto + Nginx en Docker
 └── .gitignore
 ```
 
@@ -87,31 +108,60 @@ Accede al dashboard en `http://localhost`.
 ### Firmware
 
 1. Instala [MicroPython](https://micropython.org/) en la XIAO ESP32S3
-2. Edita `firmware/config.py` con tus credenciales WiFi y la IP del broker
-3. Sube la carpeta `firmware/` a la placa con [Pymakr](https://marketplace.visualstudio.com/items?itemName=pycom.Pymakr) (VS Code) o `ampy`
+2. Copia `firmware/config.example.py` a `firmware/config.py` y edita tus credenciales
+3. Sube los archivos a la placa:
 
-## Comandos MQTT
+```bash
+# Con mpremote
+mpremote cp firmware/boot.py :boot.py
+mpremote cp firmware/main.py :main.py
+mpremote cp firmware/config.py :config.py
+mpremote mkdir :lib
+mpremote cp firmware/lib/config_store.py :lib/config_store.py
+mpremote cp firmware/lib/boot_log.py :lib/boot_log.py
+mpremote cp firmware/lib/morse.py :lib/morse.py
+mpremote cp firmware/lib/webserver.py :lib/webserver.py
+```
 
-Publicar en el tópico `xiao_pavas/led/cmd`:
+4. Copia `web/index.html` al filesystem del ESP32 si quieres servir el dashboard desde el dispositivo:
 
-| Comando             | Descripción                    |
-|---------------------|--------------------------------|
-| `on`                | Enciende el LED                |
-| `off`               | Apaga el LED                   |
-| `toggle`            | Alterna on/off                 |
-| `breathe`           | Efecto respiración cíclica     |
-| `blink`             | Parpadeo (1 Hz)                |
-| `strobe`            | Parpadeo rápido (10 Hz)        |
-| `sos`               | Patrón SOS en morse            |
-| `fade_in`           | Encendido gradual              |
-| `fade_out`          | Apagado gradual                |
-| `brightness:0..100` | Ajustar brillo (porcentaje)    |
+```bash
+mpremote mkdir :web
+mpremote cp web/index.html :web/index.html
+```
 
 ## Tópicos MQTT
 
-| Tópico                         | Dirección          | Descripción                |
-|---------------------------------|--------------------|----------------------------|
-| `xiao_pavas/led/cmd`           | Dashboard → Device | Comandos de control        |
-| `xiao_pavas/led/status`        | Device → Dashboard | Estado JSON (retained)     |
-| `xiao_pavas/device/telemetry`  | Device → Dashboard | Telemetría periódica       |
-| `xiao_pavas/device/online`     | Device → Dashboard | LWT online/offline         |
+Cada dispositivo publica/suscribe bajo el prefijo `d/{MAC}/` donde MAC es `AA-BB-CC-DD-EE-FF` (hyphenated).
+
+| Tópico                          | Dirección          | Descripción                       |
+|---------------------------------|--------------------|-----------------------------------|
+| `d/{MAC}/led/cmd`               | Dashboard → Device | Comandos de control               |
+| `d/{MAC}/led/status`            | Device → Dashboard | Estado JSON (retained)            |
+| `d/{MAC}/device/telemetry`      | Device → Dashboard | Telemetría periódica              |
+| `d/{MAC}/device/online`         | Device → Dashboard | LWT online/offline (retained)     |
+| `d/{MAC}/config/set`            | Dashboard → Device | Enviar nueva configuración        |
+| `d/{MAC}/config/current`        | Device → Dashboard | Config actual (retained)          |
+| `d/{MAC}/config/ack`            | Device → Dashboard | ACK de config (success/errors)    |
+| `d/{MAC}/wifi/scan`             | Dashboard → Device | Solicitar escaneo WiFi            |
+| `d/{MAC}/wifi/scan_results`     | Device → Dashboard | Resultados del escaneo            |
+
+El dashboard suscribe con wildcards: `d/+/led/status`, `d/+/device/telemetry`, etc.
+
+## Comandos MQTT
+
+Publicar en `d/{MAC}/led/cmd`:
+
+| Comando              | Descripción                    |
+|----------------------|--------------------------------|
+| `on`                 | Enciende el LED                |
+| `off`                | Apaga el LED                   |
+| `toggle`             | Alterna on/off                 |
+| `breathe`            | Efecto respiración cíclica     |
+| `blink`              | Parpadeo (1 Hz)                |
+| `strobe`             | Parpadeo rápido (10 Hz)        |
+| `sos`                | Patrón SOS en morse            |
+| `fade_in`            | Encendido gradual              |
+| `fade_out`           | Apagado gradual                |
+| `brightness:0..100`  | Ajustar brillo (porcentaje)    |
+| `morse:TEXTO`        | Transmitir texto en morse      |

@@ -1,7 +1,11 @@
 .claude/
 *.md
 !README.md
+!CLAUDE.md
 pymakr.conf
+
+# Credenciales - nunca commitear config.py real
+firmware/config.py
 
 # Docker - volumenes de Mosquitto
 mosquitto/data/
