@@ -780,7 +780,7 @@ input[type=range]::-moz-range-progress{
           </svg>
           <div class="gauge-center">
             <span class="gauge-value" id="tRamPct">--%</span>
-            <span class="gauge-unit" id="tRam">-- KB</span>
+            <span class="gauge-unit" id="tRam">-- MB</span>
           </div>
         </div>
         <div class="gauge-label"><span data-i18n="tele_ram">Free RAM</span> <span class="info-tip" data-tip="Available heap memory on the ESP32. Low values may cause instability" data-tip-es="Memoria heap disponible en el ESP32. Valores bajos pueden causar inestabilidad">?</span></div>
@@ -796,7 +796,7 @@ input[type=range]::-moz-range-progress{
           </svg>
           <div class="gauge-center">
             <span class="gauge-value" id="tFlashPct">--%</span>
-            <span class="gauge-unit" id="tFlash">-- KB</span>
+            <span class="gauge-unit" id="tFlash">-- MB</span>
           </div>
         </div>
         <div class="gauge-label"><span data-i18n="tele_flash">Flash Used</span> <span class="info-tip" data-tip="Internal flash storage usage. Includes firmware, config, and log files" data-tip-es="Uso del almacenamiento flash interno. Incluye firmware, config y archivos de log">?</span></div>
@@ -1814,16 +1814,16 @@ function renderTelemetry(dev){
   $('tUptime').textContent=h+'h '+m+'m '+s+'s';
   // RAM
   var ram=t.free_ram||0;
-  var ramKb=(ram/1024).toFixed(1);
-  $('tRam').textContent=ramKb+' KB';
+  var ramMb=(ram/1048576).toFixed(2);
+  $('tRam').textContent=ramMb+' MB';
   var ramPct=Math.min(100,(ram/(512*1024))*100);
   $('tRamPct').textContent=Math.round(ramPct)+'%';
   setGauge('gaugeRam',ramPct);
   // Flash
   var fsTotal=t.fs_total||1,fsFree=t.fs_free||0;
   var fsUsed=fsTotal-fsFree;
-  var fsUsedKb=(fsUsed/1024).toFixed(1),fsTotalKb=(fsTotal/1024).toFixed(1);
-  $('tFlash').textContent=fsUsedKb+'/'+fsTotalKb+' KB';
+  var fsUsedMb=(fsUsed/1048576).toFixed(2),fsTotalMb=(fsTotal/1048576).toFixed(1);
+  $('tFlash').textContent=fsUsedMb+'/'+fsTotalMb+' MB';
   var fsPct=Math.min(100,(fsUsed/fsTotal)*100);
   $('tFlashPct').textContent=Math.round(fsPct)+'%';
   setGauge('gaugeFlash',fsPct);

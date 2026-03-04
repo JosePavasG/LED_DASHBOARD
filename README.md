@@ -8,7 +8,7 @@ Dashboard web profesional para control remoto de LEDs con efectos PWM mediante M
 
 ```
 ┌──────────────┐                        ┌────────────────┐                       ┌──────────────┐
-│  XIAO ESP32  │◄──── MQTT:1883 ──────►│   Mosquitto    │◄── WebSocket:9001 ──►│  Dashboard   │
+│  XIAO ESP32  │◄──── MQTT:1883 ──────► │   Mosquitto    │◄── WebSocket:9001 ──► │  Dashboard   │
 │  MicroPython │  d/{MAC}/led/cmd ...   │   (Docker)     │   nginx proxy /mqtt   │  (browser)   │
 └──────────────┘                        └────────────────┘                       └──────────────┘
        ×N                                      │
