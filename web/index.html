@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>XIAO LED Effects Dashboard</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'Segoe UI',system-ui,sans-serif;
+  background:#0a0a1a;
+  color:#e0e0e0;
+  min-height:100vh;
+}
+.app{
+  max-width:520px;
+  margin:0 auto;
+  padding:24px 16px 40px;
+}
+
+/* Header */
+.header{text-align:center;margin-bottom:24px}
+.header h1{font-size:1.5em;color:#00e5ff;letter-spacing:1px}
+.header .sub{color:#556;font-size:.82em;margin-top:2px}
+
+/* Online badge */
+.badge-row{display:flex;justify-content:center;gap:12px;margin-bottom:20px;align-items:center}
+.badge{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:4px 14px;border-radius:20px;font-size:.78em;font-weight:600;
+  letter-spacing:.5px;text-transform:uppercase;
+}
+.badge .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.badge.online{background:rgba(0,200,83,.12);color:#00c853;border:1px solid rgba(0,200,83,.3)}
+.badge.online .dot{background:#00c853;box-shadow:0 0 6px #00c853}
+.badge.offline{background:rgba(244,67,54,.12);color:#f44336;border:1px solid rgba(244,67,54,.3)}
+.badge.offline .dot{background:#f44336;box-shadow:0 0 6px #f44336}
+.badge.broker{background:rgba(33,150,243,.12);color:#42a5f5;border:1px solid rgba(33,150,243,.3)}
+.badge.broker .dot{background:#42a5f5;box-shadow:0 0 6px #42a5f5}
+.badge.broker-off{background:rgba(244,67,54,.12);color:#f44336;border:1px solid rgba(244,67,54,.3)}
+.badge.broker-off .dot{background:#f44336}
+
+/* LED circle */
+.led-container{text-align:center;margin-bottom:24px}
+.led-circle{
+  width:150px;height:150px;
+  border-radius:50%;
+  margin:0 auto;
+  display:flex;align-items:center;justify-content:center;flex-direction:column;
+  border:3px solid #222;
+  background:#0f0f1e;
+  transition:border-color .3s,box-shadow .3s,background .3s;
+  position:relative;
+}
+.led-circle .effect-label{font-size:.7em;color:#667;margin-top:4px;text-transform:uppercase;letter-spacing:1px}
+.led-circle .pct{font-size:2em;font-weight:700;line-height:1}
+
+.led-circle.on{
+  border-color:#00e676;
+  background:radial-gradient(circle,rgba(0,230,118,.15) 0%,#0f0f1e 70%);
+  box-shadow:0 0 40px rgba(0,230,118,.25),0 0 80px rgba(0,230,118,.08);
+  color:#00e676;
+}
+.led-circle.off{border-color:#444;color:#555}
+
+/* Breathe animation on web circle */
+@keyframes webBreathe{
+  0%,100%{box-shadow:0 0 20px rgba(0,230,118,.1),0 0 40px rgba(0,230,118,.05);opacity:.6}
+  50%{box-shadow:0 0 50px rgba(0,230,118,.35),0 0 100px rgba(0,230,118,.12);opacity:1}
+}
+@keyframes webBlink{
+  0%,49%{opacity:1}50%,100%{opacity:.15}
+}
+@keyframes webStrobe{
+  0%,49%{opacity:1}50%,100%{opacity:0}
+}
+@keyframes webSos{
+  0%,5%{opacity:1}6%,11%{opacity:0}
+  12%,17%{opacity:1}18%,23%{opacity:0}
+  24%,29%{opacity:1}30%,40%{opacity:0}
+  41%,52%{opacity:1}53%,58%{opacity:0}
+  59%,70%{opacity:1}71%,76%{opacity:0}
+  77%,88%{opacity:1}89%,100%{opacity:0}
+}
+@keyframes webFadeIn{0%{opacity:0}100%{opacity:1}}
+@keyframes webFadeOut{0%{opacity:1}100%{opacity:0}}
+
+.led-circle.fx-breathe{animation:webBreathe 3s ease-in-out infinite}
+.led-circle.fx-blink{animation:webBlink 1s steps(1) infinite}
+.led-circle.fx-strobe{animation:webStrobe 100ms steps(1) infinite}
+.led-circle.fx-sos{animation:webSos 3.6s linear infinite}
+.led-circle.fx-fade_in{animation:webFadeIn 1.5s ease-out forwards}
+.led-circle.fx-fade_out{animation:webFadeOut 1.5s ease-in forwards}
+
+/* Brightness slider */
+.brightness-section{margin-bottom:24px;padding:0 8px}
+.brightness-section label{display:flex;justify-content:space-between;font-size:.85em;color:#889;margin-bottom:6px}
+.slider-track{position:relative;height:36px;display:flex;align-items:center}
+input[type=range]{
+  -webkit-appearance:none;appearance:none;
+  width:100%;height:6px;
+  background:linear-gradient(90deg,#222 0%,#00e5ff 100%);
+  border-radius:3px;outline:none;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;
+  width:22px;height:22px;border-radius:50%;
+  background:#00e5ff;cursor:pointer;
+  box-shadow:0 0 10px rgba(0,229,255,.4);
+}
+input[type=range]::-moz-range-thumb{
+  width:22px;height:22px;border-radius:50%;border:none;
+  background:#00e5ff;cursor:pointer;
+  box-shadow:0 0 10px rgba(0,229,255,.4);
+}
+
+/* Effect cards grid */
+.effects-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
+  margin-bottom:24px;
+}
+.fx-card{
+  padding:14px 4px;
+  border-radius:10px;
+  border:1px solid #1e1e3a;
+  background:#12122a;
+  text-align:center;
+  cursor:pointer;
+  transition:all .2s;
+  user-select:none;
+}
+.fx-card:hover{border-color:#00e5ff44;background:#181840}
+.fx-card:active{transform:scale(.94)}
+.fx-card.active{
+  border-color:#00e5ff;
+  background:linear-gradient(135deg,#0d1b3e,#12122a);
+  box-shadow:0 0 16px rgba(0,229,255,.15);
+}
+.fx-card .icon{font-size:1.5em;margin-bottom:4px}
+.fx-card .name{font-size:.72em;color:#99a;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.fx-card.active .name{color:#00e5ff}
+
+/* Telemetry panel */
+.telemetry{
+  background:#12122a;
+  border:1px solid #1e1e3a;
+  border-radius:12px;
+  padding:16px;
+  margin-bottom:20px;
+}
+.telemetry h3{font-size:.8em;color:#556;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px}
+.tele-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tele-item{display:flex;flex-direction:column;gap:4px}
+.tele-item .tl{font-size:.7em;color:#667;text-transform:uppercase;letter-spacing:.5px}
+.tele-item .tv{font-size:1em;font-weight:600;color:#ccd}
+.tele-item .bar{height:4px;border-radius:2px;background:#1a1a35;overflow:hidden;margin-top:2px}
+.tele-item .bar-fill{height:100%;border-radius:2px;transition:width .5s}
+.bar-rssi .bar-fill{background:linear-gradient(90deg,#f44336,#ff9800,#4caf50)}
+.bar-mem .bar-fill{background:linear-gradient(90deg,#00e5ff,#00b0ff)}
+
+/* Log */
+.log-section{margin-top:8px}
+.log-section summary{
+  font-size:.78em;color:#556;cursor:pointer;text-transform:uppercase;letter-spacing:.5px;
+  padding:4px 0;
+}
+.log{
+  margin-top:8px;
+  background:#0d0d1a;
+  border:1px solid #1a1a30;
+  border-radius:8px;
+  padding:10px;
+  max-height:140px;
+  overflow-y:auto;
+  font-family:'Cascadia Code','Fira Code',monospace;
+  font-size:.73em;
+  color:#556;
+}
+.log div{margin-bottom:1px}
+.log .ok{color:#00c853}
+.log .err{color:#f44336}
+.log .info{color:#42a5f5}
+
+/* Responsive */
+@media(max-width:400px){
+  .effects-grid{grid-template-columns:repeat(2,1fr);gap:6px}
+  .led-circle{width:120px;height:120px}
+  .led-circle .pct{font-size:1.6em}
+  .tele-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <h1>LED DASHBOARD</h1>
+    <p class="sub">Effects</p>
+  </div>
+
+  <div class="badge-row">
+    <span class="badge broker-off" id="brokerBadge"><span class="dot"></span><span id="brokerText">BROKER</span></span>
+    <span class="badge offline" id="deviceBadge"><span class="dot"></span><span id="deviceText">DEVICE</span></span>
+  </div>
+
+  <div class="led-container">
+    <div class="led-circle off" id="ledCircle">
+      <span class="pct" id="ledPct">OFF</span>
+      <span class="effect-label" id="ledEffect"></span>
+    </div>
+  </div>
+
+  <div class="brightness-section">
+    <label><span>Brillo</span><span id="briVal">100%</span></label>
+    <div class="slider-track">
+      <input type="range" id="briSlider" min="0" max="100" value="100">
+    </div>
+  </div>
+
+  <div class="effects-grid">
+    <div class="fx-card active" data-cmd="on" onclick="sendFx(this)">
+      <div class="icon">💡</div><div class="name">On</div>
+    </div>
+    <div class="fx-card" data-cmd="off" onclick="sendFx(this)">
+      <div class="icon">⭘</div><div class="name">Off</div>
+    </div>
+    <div class="fx-card" data-cmd="breathe" onclick="sendFx(this)">
+      <div class="icon">🫁</div><div class="name">Breathe</div>
+    </div>
+    <div class="fx-card" data-cmd="blink" onclick="sendFx(this)">
+      <div class="icon">👁</div><div class="name">Blink</div>
+    </div>
+    <div class="fx-card" data-cmd="sos" onclick="sendFx(this)">
+      <div class="icon">🆘</div><div class="name">SOS</div>
+    </div>
+    <div class="fx-card" data-cmd="strobe" onclick="sendFx(this)">
+      <div class="icon">⚡</div><div class="name">Strobe</div>
+    </div>
+    <div class="fx-card" data-cmd="fade_in" onclick="sendFx(this)">
+      <div class="icon">🌅</div><div class="name">Fade In</div>
+    </div>
+    <div class="fx-card" data-cmd="fade_out" onclick="sendFx(this)">
+      <div class="icon">🌑</div><div class="name">Fade Out</div>
+    </div>
+  </div>
+
+  <div class="telemetry">
+    <h3>Telemetria</h3>
+    <div class="tele-grid">
+      <div class="tele-item bar-rssi">
+        <span class="tl">WiFi RSSI</span>
+        <span class="tv" id="tRssi">-- dBm</span>
+        <div class="bar"><div class="bar-fill" id="tRssiBar" style="width:0"></div></div>
+      </div>
+      <div class="tele-item">
+        <span class="tl">Uptime</span>
+        <span class="tv" id="tUptime">--</span>
+      </div>
+      <div class="tele-item bar-mem">
+        <span class="tl">RAM libre</span>
+        <span class="tv" id="tRam">-- KB</span>
+        <div class="bar"><div class="bar-fill" id="tRamBar" style="width:0"></div></div>
+      </div>
+      <div class="tele-item">
+        <span class="tl">IP</span>
+        <span class="tv" id="tIp">--</span>
+      </div>
+    </div>
+  </div>
+
+  <details class="log-section">
+    <summary>Event Log</summary>
+    <div class="log" id="log"></div>
+  </details>
+</div>
+
+<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+<script>
+const BROKER = 'ws://broker.hivemq.com:8000/mqtt';
+const T_CMD = 'xiao_pavas/led/cmd';
+const T_STATUS = 'xiao_pavas/led/status';
+const T_TELE = 'xiao_pavas/device/telemetry';
+const T_ONLINE = 'xiao_pavas/device/online';
+
+const $ = id => document.getElementById(id);
+const logEl = $('log');
+const ledCircle = $('ledCircle');
+const ledPct = $('ledPct');
+const ledEffect = $('ledEffect');
+const briSlider = $('briSlider');
+const briVal = $('briVal');
+const cards = document.querySelectorAll('.fx-card');
+
+let state = { effect: 'none', brightness: 100, led_on: false };
+
+function log(msg, cls) {
+  const d = document.createElement('div');
+  if (cls) d.className = cls;
+  d.textContent = '[' + new Date().toLocaleTimeString() + '] ' + msg;
+  logEl.prepend(d);
+  if (logEl.children.length > 80) logEl.lastChild.remove();
+}
+
+// --- LED circle update ---
+function updateLedCircle() {
+  // Remove all fx- classes
+  ledCircle.className = 'led-circle';
+
+  if (!state.led_on) {
+    ledCircle.classList.add('off');
+    ledPct.textContent = 'OFF';
+    ledEffect.textContent = '';
+    return;
+  }
+
+  ledCircle.classList.add('on');
+  ledPct.textContent = state.brightness + '%';
+
+  if (state.effect !== 'none') {
+    ledCircle.classList.add('fx-' + state.effect);
+    ledEffect.textContent = state.effect.replace('_', ' ');
+  } else {
+    ledEffect.textContent = 'solid';
+  }
+}
+
+// --- Active card highlight ---
+function highlightCard(cmd) {
+  cards.forEach(c => c.classList.remove('active'));
+  const match = document.querySelector('.fx-card[data-cmd="' + cmd + '"]');
+  if (match) match.classList.add('active');
+}
+
+// --- Status handler ---
+function handleStatus(data) {
+  try {
+    const s = JSON.parse(data);
+    state.effect = s.effect || 'none';
+    state.brightness = s.brightness != null ? s.brightness : 100;
+    state.led_on = !!s.led_on;
+
+    briSlider.value = state.brightness;
+    briVal.textContent = state.brightness + '%';
+    updateLedCircle();
+
+    // Highlight correct card
+    if (!state.led_on) {
+      highlightCard('off');
+    } else if (state.effect === 'none') {
+      highlightCard('on');
+    } else {
+      highlightCard(state.effect);
+    }
+  } catch (e) {
+    // Legacy simple status
+    const on = data.trim().toUpperCase() === 'ON';
+    state.led_on = on;
+    state.effect = 'none';
+    updateLedCircle();
+    highlightCard(on ? 'on' : 'off');
+  }
+}
+
+// --- Telemetry handler ---
+function handleTelemetry(data) {
+  try {
+    const t = JSON.parse(data);
+    // RSSI
+    const rssi = t.rssi || 0;
+    $('tRssi').textContent = rssi + ' dBm';
+    // RSSI range: -100 (bad) to -30 (great)
+    const rssiPct = Math.max(0, Math.min(100, ((rssi + 100) / 70) * 100));
+    $('tRssiBar').style.width = rssiPct + '%';
+
+    // Uptime
+    const ut = t.uptime || 0;
+    const h = Math.floor(ut / 3600);
+    const m = Math.floor((ut % 3600) / 60);
+    const s = ut % 60;
+    $('tUptime').textContent = h + 'h ' + m + 'm ' + s + 's';
+
+    // RAM
+    const ram = t.free_ram || 0;
+    const ramKb = (ram / 1024).toFixed(1);
+    $('tRam').textContent = ramKb + ' KB';
+    // Assume 512KB total for bar
+    const ramPct = Math.min(100, (ram / (512 * 1024)) * 100);
+    $('tRamBar').style.width = ramPct + '%';
+
+    // IP
+    $('tIp').textContent = t.ip || '--';
+  } catch (e) {}
+}
+
+// --- Online/Offline badge ---
+function setDeviceOnline(online) {
+  const b = $('deviceBadge');
+  b.className = 'badge ' + (online ? 'online' : 'offline');
+  $('deviceText').textContent = online ? 'ONLINE' : 'OFFLINE';
+}
+
+function setBrokerConnected(ok) {
+  const b = $('brokerBadge');
+  b.className = 'badge ' + (ok ? 'broker' : 'broker-off');
+  $('brokerText').textContent = ok ? 'BROKER' : 'BROKER';
+  cards.forEach(c => { if (ok) c.style.pointerEvents = ''; else c.style.pointerEvents = 'none'; });
+  briSlider.disabled = !ok;
+}
+
+// --- MQTT ---
+log('Conectando a broker...', 'info');
+const client = mqtt.connect(BROKER, {
+  clientId: 'web_fx_' + Math.random().toString(16).slice(2, 8),
+  clean: true,
+  reconnectPeriod: 3000,
+});
+
+client.on('connect', function () {
+  setBrokerConnected(true);
+  log('Conectado al broker MQTT', 'ok');
+  client.subscribe([T_STATUS, T_TELE, T_ONLINE]);
+  log('Suscrito a topicos', 'ok');
+});
+
+client.on('message', function (topic, msg) {
+  const t = topic.toString();
+  const val = msg.toString();
+
+  if (t === T_STATUS) {
+    handleStatus(val);
+    log('Status: ' + val, 'ok');
+  } else if (t === T_TELE) {
+    handleTelemetry(val);
+  } else if (t === T_ONLINE) {
+    const online = val.trim().toLowerCase() === 'online';
+    setDeviceOnline(online);
+    log('Device: ' + (online ? 'ONLINE' : 'OFFLINE'), online ? 'ok' : 'err');
+  }
+});
+
+client.on('offline', function () {
+  setBrokerConnected(false);
+  log('Broker desconectado', 'err');
+});
+
+client.on('error', function (err) {
+  log('Error: ' + err.message, 'err');
+});
+
+// --- Optimistic UI update ---
+function applyOptimistic(cmd) {
+  if (cmd === 'on') {
+    state.led_on = true; state.effect = 'none';
+  } else if (cmd === 'off') {
+    state.led_on = false; state.effect = 'none';
+  } else if (cmd === 'toggle') {
+    state.led_on = !state.led_on; state.effect = 'none';
+  } else if (['breathe','blink','strobe','sos','fade_in','fade_out'].includes(cmd)) {
+    state.led_on = true; state.effect = cmd;
+  }
+  updateLedCircle();
+  if (!state.led_on) highlightCard('off');
+  else if (state.effect === 'none') highlightCard('on');
+  else highlightCard(state.effect);
+}
+
+// --- Send commands ---
+function send(cmd) {
+  client.publish(T_CMD, cmd);
+  log('Enviado: ' + cmd, 'info');
+}
+
+function sendFx(el) {
+  const cmd = el.dataset.cmd;
+  applyOptimistic(cmd);
+  send(cmd);
+}
+
+// --- Brightness slider with debounce ---
+let briTimeout = null;
+briSlider.addEventListener('input', function () {
+  const v = this.value;
+  briVal.textContent = v + '%';
+  state.brightness = parseInt(v);
+  updateLedCircle();
+  if (briTimeout) clearTimeout(briTimeout);
+  briTimeout = setTimeout(() => {
+    send('brightness:' + v);
+  }, 150);
+});
+
+// Init
+updateLedCircle();
+</script>
+</body>
+</html>
