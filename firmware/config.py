@@ -7,8 +7,8 @@ Editar con tus credenciales antes de subir a la placa.
 # ---------------------------------------------------------------
 # WiFi
 # ---------------------------------------------------------------
-WIFI_SSID = ""
-WIFI_PASSWORD = ""
+WIFI_SSID = ""       # Tu red WiFi
+WIFI_PASSWORD = ""   # Tu contraseña WiFi
 WIFI_TIMEOUT_S = 15
 
 # ---------------------------------------------------------------
