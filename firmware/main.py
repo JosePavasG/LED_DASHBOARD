@@ -72,6 +72,7 @@ def _build_topics():
         'config_ack':   (prefix + "/config/ack").encode(),
         'wifi_scan':    (prefix + "/wifi/scan").encode(),
         'wifi_scan_res':(prefix + "/wifi/scan_results").encode(),
+        'wifi_forget':  (prefix + "/wifi/forget").encode(),
     }
 
     # Auto-generate client ID from MAC if empty
@@ -325,7 +326,7 @@ def _cmd_brightness(msg):
         val = int(msg.split(":")[1])
         set_brightness(val)
     except ValueError:
-        print("  Valor de brillo invalido")
+        print("  Valor de brillo inválido")
 
 def _cmd_morse(msg_original):
     global _current_effect, _led_on
@@ -356,6 +357,11 @@ def mqtt_callback(topic, msg):
     # WiFi scan handler
     if topic == _topics['wifi_scan']:
         _handle_wifi_scan()
+        return
+
+    # WiFi forget handler
+    if topic == _topics['wifi_forget']:
+        _handle_wifi_forget()
         return
 
     # Config set handler (topic separado)
@@ -404,13 +410,25 @@ def _handle_wifi_scan():
         print("[WiFi] Error en scan: {}".format(e))
 
 
+def _handle_wifi_forget():
+    """Borra config.json para olvidar credenciales WiFi y reinicia."""
+    print("[WARN] WiFi forget — borrando config.json y reiniciando...")
+    try:
+        os.remove("/config.json")
+        print("[WARN] config.json eliminado")
+    except OSError:
+        pass
+    time.sleep(2)
+    reset()
+
+
 def _handle_config_set(msg_str):
     """Procesa JSON de config/set, valida, aplica, publica ACK."""
     global _pending_restart
     try:
         new_values = json.loads(msg_str)
     except ValueError:
-        _publish_config_ack(False, ["JSON invalido"], False)
+        _publish_config_ack(False, ["JSON inválido"], False)
         return
 
     applied, errors, needs_restart = config_store.validate_and_apply(new_values)
@@ -502,7 +520,7 @@ def mqtt_connect():
     client.set_last_will(_topics['online'], b"offline", retain=True)
     client.set_callback(mqtt_callback)
 
-    print("[MQTT] Conectando a {}:{}".format(config.MQTT_BROKER, config.MQTT_PORT))
+    print("[MQTT] Conectando a {}:{} (ID: {})".format(config.MQTT_BROKER, config.MQTT_PORT, config.MQTT_CLIENT_ID))
     client.connect()
     print("[MQTT] Conectado OK")
 
@@ -515,6 +533,9 @@ def mqtt_connect():
     time.sleep_ms(50)
     client.subscribe(_topics['wifi_scan'])
     print("[MQTT] Suscrito a: {}".format(_topics['wifi_scan'].decode()))
+    time.sleep_ms(50)
+    client.subscribe(_topics['wifi_forget'])
+    print("[MQTT] Suscrito a: {}".format(_topics['wifi_forget'].decode()))
     time.sleep_ms(50)
     mqtt_publish_status()
 
@@ -559,8 +580,13 @@ def main():
 
     # WiFi
     if not wifi_connect():
-        print("[ERROR] No WiFi — reiniciando en 10s")
-        time.sleep(10)
+        print("[WARN] No WiFi — borrando config.json y reiniciando...")
+        try:
+            os.remove("/config.json")
+            print("[WARN] config.json eliminado, se usaran valores de config.py")
+        except OSError:
+            pass
+        time.sleep(5)
         reset()
 
     # Build MAC-based topics (requires WiFi to be connected)

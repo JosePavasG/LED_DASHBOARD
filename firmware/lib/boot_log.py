@@ -63,7 +63,7 @@ def init():
     except (OSError, ValueError, TypeError):
         _crashes = []
 
-    print("[Boot] #{} | Crashes almacenados: {}".format(
+    print("[Boot] #{} | Stored crashes: {}".format(
         _boot_count, len(_crashes)))
 
 

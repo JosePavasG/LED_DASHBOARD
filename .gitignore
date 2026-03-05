@@ -10,3 +10,6 @@ firmware/config.py
 # Docker - volumenes de Mosquitto
 mosquitto/data/
 mosquitto/log/
+
+# Firmware binary - use GitHub Releases instead
+.bin/

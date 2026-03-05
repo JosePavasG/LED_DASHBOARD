@@ -519,6 +519,8 @@ input[type=range]::-moz-range-progress{
 .ssid-dropdown-item .net-meta{font-size:.68rem;color:var(--text-secondary)}
 .ssid-dropdown-item .net-saved{color:var(--green);font-size:.68rem;margin-left:6px}
 .ssid-dropdown-msg{padding:10px 12px;font-size:.75rem;color:var(--text-secondary);text-align:center}
+.btn-small.btn-danger{background:transparent;color:var(--text-secondary);border:1px solid var(--border);border-radius:6px;padding:4px 10px;cursor:pointer;transition:all .2s}
+.btn-small.btn-danger:hover{background:#e74c3c;color:#fff;border-color:#e74c3c}
 
 /* Info tooltips */
 .info-tip{
@@ -543,6 +545,8 @@ input[type=range]::-moz-range-progress{
 .settings-field .info-tip:hover::after{left:auto;right:0}
 
 /* ===== Device Picker ===== */
+.dev-picker-selected{display:flex;align-items:center;gap:6px;padding:5px 8px;margin:0 4px 4px;border-radius:6px;background:var(--accent-glow);font-size:.72rem;color:var(--text);min-height:22px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.dev-picker-selected .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 .dev-picker{padding:0 4px}
 .dev-picker-field{position:relative}
 .dev-picker-input{
@@ -631,6 +635,7 @@ input[type=range]::-moz-range-progress{
 
   <div class="sidebar-section" id="deviceSelectorSection">
     <div class="sidebar-section-label" data-i18n="sidebar_device">Device</div>
+    <div class="dev-picker-selected" id="devPickerSelected"></div>
     <div class="dev-picker" id="devPicker">
       <div class="dev-picker-field">
         <input type="text" class="dev-picker-input" id="devPickerInput" placeholder="Search device..." autocomplete="off"
@@ -931,6 +936,7 @@ input[type=range]::-moz-range-progress{
           <label>Password <span class="info-tip" data-tip="WiFi network password" data-tip-es="Contrase\u00F1a de la red WiFi">?</span></label>
           <input type="password" id="cfgWifiPassword" placeholder="WiFi Password">
         </div>
+        <button class="btn-small btn-danger" onclick="forgetWifiPasswords()" style="margin-top:8px;font-size:.75rem" data-i18n="forget_networks">Forget saved networks</button>
       </div>
 
       <!-- MQTT Broker -->
@@ -1055,7 +1061,8 @@ _i18n_data={
     set_device_name:'Device Name',
     theme_light:'Light mode',theme_dark:'Dark mode',
     lang_label:'English',no_devices:'-- No devices --',
-    ph_search_device:'Search device...'
+    ph_search_device:'Search device...',
+    forget_networks:'Forget saved networks'
   },
   es:{
     brand_title:'Centro de Control',brand_sub:'Gestor de Dispositivos IoT',
@@ -1075,7 +1082,8 @@ _i18n_data={
     set_device_name:'Nombre del Dispositivo',
     theme_light:'Modo claro',theme_dark:'Modo oscuro',
     lang_label:'Espa\u00F1ol',no_devices:'-- Sin dispositivos --',
-    ph_search_device:'Buscar dispositivo...'
+    ph_search_device:'Buscar dispositivo...',
+    forget_networks:'Olvidar redes guardadas'
   }
 };
 function applyLang(){
@@ -1579,6 +1587,18 @@ function saveWifiPassword(ssid,pw){
   localStorage.setItem('wifi-passwords',JSON.stringify(map));
 }
 function getWifiPassword(ssid){return _getWifiPasswords()[ssid]||'';}
+function forgetWifiPasswords(){
+  localStorage.removeItem('wifi-passwords');
+  $('cfgWifiSsid').value='';
+  $('cfgWifiPassword').value='';
+  var t=pubTopic('wifi/forget');
+  if(t&&client&&client.connected){
+    client.publish(t,'');
+    log('WiFi credentials cleared — device will restart','ok');
+  }else{
+    log('Saved networks forgotten (device offline)','info');
+  }
+}
 
 // --- WiFi Scan Combobox ---
 var _scanTimeout=null;
@@ -1678,14 +1698,21 @@ function _sortedDeviceMacs(){
   return macs;
 }
 
+function _updateSelectedLabel(){
+  var el=$('devPickerSelected');
+  if(selectedDevice&&devices[selectedDevice]){
+    var d=devices[selectedDevice];
+    var dot='<span class="dot" style="background:var('+(d.online?'--green':'--red')+')"></span>';
+    var nameIsMac=d.name&&d.name.replace(/[:-]/g,'')===d.mac.replace(/[:-]/g,'');
+    var name=d.name&&!nameIsMac?d.name+' \u2014 '+d.mac:d.mac;
+    el.innerHTML=dot+'<span>'+name+'</span>';
+  }else{
+    el.textContent=_t('no_devices');
+  }
+}
 function updateDeviceSelector(){
   updateDeviceBadge();
-  // Update input display if not focused
-  var inp=$('devPickerInput');
-  if(document.activeElement!==inp&&selectedDevice&&devices[selectedDevice]){
-    var d=devices[selectedDevice];
-    inp.value=(d.name!==d.mac?d.name+' ':'')+d.mac;
-  }
+  _updateSelectedLabel();
   if(_devPickerOpen)filterDevPicker();
 }
 
@@ -1743,14 +1770,7 @@ function closeDevPicker(){
   _devPickerOpen=false;
   $('devPickerDd').classList.remove('open');
   $('devPickerArrow').classList.remove('open');
-  // Restore display value
-  var inp=$('devPickerInput');
-  if(selectedDevice&&devices[selectedDevice]){
-    var d=devices[selectedDevice];
-    inp.value=(d.name!==d.mac?d.name+' ':'')+d.mac;
-  } else {
-    inp.value='';
-  }
+  $('devPickerInput').value='';
 }
 
 function toggleDevPicker(){
@@ -1761,11 +1781,9 @@ function selectDevice(mac){
   if(!mac||!devices[mac])return;
   selectedDevice=mac;
   localStorage.setItem('selected-device',mac);
+  _updateSelectedLabel();
   updateDeviceBadge();
   renderActiveDevice();
-  // Update input display
-  var d=devices[mac];
-  $('devPickerInput').value=(d.name!==d.mac?d.name+' ':'')+d.mac;
 }
 
 // Close picker on outside click

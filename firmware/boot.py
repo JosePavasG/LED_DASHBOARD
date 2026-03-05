@@ -21,6 +21,11 @@ Ref: https://docs.micropython.org/en/latest/reference/reset_boot.html
 FW_VERSION = "1.0.0"
 # -------------------------------------------------------
 
+# Registrar en sys.modules para que main.py pueda leer FW_VERSION
+# (boot.py se ejecuta como script, no como import, asi que no queda en sys.modules)
+import sys
+sys.modules['boot'] = type('', (), {'FW_VERSION': FW_VERSION})
+
 import gc
 gc.collect()
 
