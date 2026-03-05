@@ -1,9 +1,15 @@
-# IoT Control Center
-
-[![Release](https://img.shields.io/github/v/release/JosePavasG/LED_DASHBOARD?style=flat-square)](https://github.com/JosePavasG/LED_DASHBOARD/releases/latest)
-[![License](https://img.shields.io/github/license/JosePavasG/LED_DASHBOARD?style=flat-square)](LICENSE)
-
-Dashboard web profesional para control remoto de LEDs con efectos PWM mediante MQTT, soportando **N dispositivos ESP32** identificados por MAC. Usa **Seeed Studio XIAO ESP32S3** y un broker Mosquitto self-hosted con Docker.
+<p align="center">
+  <h1 align="center">IoT Control Center</h1>
+  <p align="center">
+    Dashboard web profesional para control remoto de LEDs con efectos PWM mediante MQTT
+    <br />
+    Soporta <strong>N dispositivos ESP32</strong> identificados por MAC
+    <br /><br />
+    <a href="https://github.com/JosePavasG/LED_DASHBOARD/releases/latest"><img src="https://img.shields.io/github/v/release/JosePavasG/LED_DASHBOARD?style=for-the-badge&color=6366f1&label=Release" alt="Release"></a>
+    &nbsp;
+    <a href="https://github.com/JosePavasG/LED_DASHBOARD/releases/latest/download/XIAO_ESP32S3_Compilado.bin"><img src="https://img.shields.io/badge/Download-Firmware.bin-34d399?style=for-the-badge&logo=espressif&logoColor=white" alt="Download"></a>
+  </p>
+</p>
 
 ---
 
@@ -27,51 +33,58 @@ Cada dispositivo se identifica por su MAC address (`AA-BB-CC-DD-EE-FF`). El dash
 
 ## Funcionalidades
 
+<table>
+<tr><td>
+
 ### Multi-Device
-- **Auto-discovery** de dispositivos vía MQTT wildcards
-- **Device picker** con búsqueda por nombre o MAC, indicadores online/offline
-- **Badge de conteo** de dispositivos online en el sidebar
-- **Nombre personalizado** configurable desde Settings (persiste en el dispositivo)
-- Todas las pestañas muestran datos del dispositivo seleccionado
+- **Auto-discovery** vía MQTT wildcards
+- **Device picker** con búsqueda, indicadores online/offline
+- **Nombre personalizado** (persiste en el dispositivo)
+- Todas las pestañas por dispositivo seleccionado
+
+</td><td>
 
 ### Device Control
-- **On / Off** del LED con badge de estado animado en el efecto activo
-- **Efectos PWM no-bloqueantes:** breathe, blink, strobe, SOS, fade in, fade out
-- **Transmisor Morse:** envío de texto libre como código morse por el LED
-- **Control de brillo** 0–100% con curva cuadrática para percepción natural
+- **On / Off** con badge animado por efecto
+- **Efectos PWM:** breathe, blink, strobe, SOS, fade
+- **Transmisor Morse** de texto libre
+- **Brillo** 0–100% con curva cuadrática
 
-### Telemetry Dashboard
-- **Gauges circulares SVG** para RAM libre, Flash usado y temperatura del MCU
-- **Stat cards** para WiFi RSSI (con barra de señal), uptime, IP, MAC y versión de firmware
-- **Exportar a CSV** con un click (incluye nombre de dispositivo en el archivo)
+</td></tr>
+<tr><td>
 
-### Event Logs
-- Log en tiempo real con badges de tipo (OK / ERR / INFO)
-- **Filtros** por tipo de evento
-- **Auto-scroll** configurable
+### Telemetry
+- **Gauges SVG** para RAM, Flash y temperatura
+- **Stat cards:** RSSI, uptime, IP, MAC, firmware
 - **Exportar a CSV** por dispositivo
 
+</td><td>
+
 ### Remote Settings
-- **Configuración remota** vía MQTT: WiFi, broker, timings de efectos, nombre del dispositivo
-- **Escaneo WiFi** desde el dashboard (dropdown con redes, señal, auto-fill de contraseñas guardadas)
-- **Olvidar redes WiFi** — borra credenciales del navegador y del dispositivo vía MQTT
-- **Validación y ACK** del dispositivo con feedback visual (success/error/restarting)
-- **Persistencia** en JSON en el filesystem del ESP32
+- Config remota vía MQTT (WiFi, broker, timings)
+- **Escaneo WiFi** con auto-fill de contraseñas
+- **Olvidar redes WiFi** (browser + dispositivo)
+- Validación + ACK con feedback visual
+
+</td></tr>
+<tr><td>
 
 ### WiFi Recovery
-- Si WiFi falla al boot, el firmware **borra `config.json`** automáticamente y reinicia
-- En el siguiente boot usa los valores de `config.py` (credenciales originales)
-- Permite mover el dispositivo a otra red editando solo `config.py`
+- WiFi falla → borra `config.json` → reinicia
+- Siguiente boot usa `config.py` (credenciales originales)
+- Permite mover dispositivo a otra red
+
+</td><td>
 
 ### UI/UX
-- **Sidebar colapsable** con navegación por pestañas (Control / Telemetry / Logs / Settings)
-- **Tema dark/light** con transiciones suaves
-- **Idioma EN/ES** con toggle en el sidebar
-- **Info-tips** (tooltips `?`) en todos los controles con descripción contextual
-- **Diseño responsive** (desktop + mobile con sidebar overlay)
-- **UI optimista:** respuesta visual instantánea antes de confirmación MQTT
-- **LWT (Last Will & Testament):** detección automática de online/offline
-- **Reconexión automática** WiFi y MQTT con watchdog (40s)
+- **Sidebar colapsable** con 4 pestañas
+- **Tema dark/light** + **idioma EN/ES**
+- **Info-tips** en todos los controles
+- **Responsive** (desktop + mobile)
+- **UI optimista** + **LWT** online/offline
+
+</td></tr>
+</table>
 
 ---
 
@@ -80,38 +93,93 @@ Cada dispositivo se identifica por su MAC address (`AA-BB-CC-DD-EE-FF`). El dash
 Descarga la imagen binaria lista para flashear desde [GitHub Releases](https://github.com/JosePavasG/LED_DASHBOARD/releases/latest/download/XIAO_ESP32S3_Compilado.bin):
 
 ```bash
-# Descargar
-curl -LO https://github.com/JosePavasG/LED_DASHBOARD/releases/latest/download/XIAO_ESP32S3_Compilado.bin
-
-# Flashear con esptool (dirección 0x0, flash completa de 8 MB)
-esptool.py --chip esp32s3 --port COM3 write_flash 0x0 firmware.bin
+# Flashear XIAO ESP32S3 (flash completa de 8 MB)
+python -m esptool --chip esp32s3 --port COM3 write_flash 0x0 XIAO_ESP32S3_Compilado.bin
 ```
 
-> **Nota:** Después de flashear, aún necesitas crear `config.py` con tus credenciales WiFi y MQTT (ver sección Setup → Firmware).
+> **Nota:** Después de flashear, aún necesitas crear `config.py` con tus credenciales WiFi y MQTT (ver sección [Setup → Firmware](#firmware)).
+
+---
+
+## Referencia esptool
+
+Comandos esenciales para trabajar con placas ESP32.
+
+### Identificar placa
+
+```bash
+# Detectar chip y MAC
+python -m esptool chip_id
+
+# Info completa (flash size, crystal, features)
+python -m esptool flash_id
+```
+
+### Borrar flash
+
+```bash
+# Borrar toda la memoria flash (recomendado antes de flashear MicroPython)
+python -m esptool --chip esp32s3 --port COM3 erase_flash
+
+# ESP32 clásico (WROOM/WROVER)
+python -m esptool --chip esp32 --port COM3 erase_flash
+```
+
+### Flashear firmware
+
+```bash
+# ESP32-S3 (XIAO, 8 MB flash)
+python -m esptool --chip esp32s3 --port COM3 write_flash 0x0 firmware.bin
+
+# ESP32 clásico (WROOM, 4 MB flash)
+python -m esptool --chip esp32 --port COM3 write_flash -z 0x1000 firmware.bin
+
+# ESP32-C3
+python -m esptool --chip esp32c3 --port COM3 write_flash 0x0 firmware.bin
+```
+
+> **Tip:** La dirección de inicio varía por chip: `0x0` para S3/C3, `0x1000` para ESP32 clásico.
+
+### Leer / respaldar flash
+
+```bash
+# Respaldar flash completa ESP32-S3 (8 MB)
+python -m esptool --chip esp32s3 --port COM3 read_flash 0 0x800000 backup_s3.bin
+
+# Respaldar flash ESP32 clásico (4 MB)
+python -m esptool --chip esp32 --port COM3 read_flash 0 0x400000 backup_esp32.bin
+```
+
+### Tamaños de flash comunes
+
+| Chip | Flash | Hex size | Dirección de inicio |
+|------|-------|----------|---------------------|
+| ESP32 (WROOM) | 4 MB | `0x400000` | `0x1000` |
+| ESP32-S2 | 4 MB | `0x400000` | `0x0` |
+| ESP32-S3 (XIAO) | 8 MB | `0x800000` | `0x0` |
+| ESP32-C3 | 4 MB | `0x400000` | `0x0` |
 
 ---
 
 ## Estructura del proyecto
 
 ```
-├── firmware/
-│   ├── boot.py                # Boot temprano + FW_VERSION (editar aquí para releases)
-│   ├── main.py                # Firmware principal (WiFi, MQTT, LED, telemetría)
-│   ├── config.example.py      # Template de configuración (copiar a config.py)
-│   └── lib/
-│       ├── config_store.py    # Config runtime con persistencia JSON + validación
-│       ├── boot_log.py        # Boot counter + crash log vía NVS
-│       ├── morse.py           # Generador morse no-bloqueante (ITU timing)
-│       └── webserver.py       # HTTP server no-bloqueante para servir dashboard
-├── web/
-│   └── index.html             # Dashboard web (HTML + CSS + JS, single-file)
-├── mosquitto/
-│   └── config/
-│       └── mosquitto.conf     # Configuración del broker Mosquitto
-├── nginx/
-│   └── default.conf           # Nginx: sirve dashboard + proxy WebSocket
-├── docker-compose.yml         # Mosquitto + Nginx en Docker
-└── .gitignore
+firmware/
+├── boot.py                # Boot temprano + FW_VERSION
+├── main.py                # WiFi, MQTT, LED, telemetría
+├── config.example.py      # Template (copiar a config.py)
+└── lib/
+    ├── config_store.py    # Config runtime + persistencia JSON
+    ├── boot_log.py        # Boot counter + crash log (NVS)
+    ├── morse.py           # Morse no-bloqueante (ITU timing)
+    └── webserver.py       # HTTP server no-bloqueante
+
+web/
+└── index.html             # Dashboard (HTML+CSS+JS, single-file)
+
+mosquitto/config/          # Configuración del broker
+nginx/                     # Reverse proxy + WebSocket
+docker-compose.yml         # Mosquitto + Nginx
 ```
 
 ---
@@ -134,20 +202,19 @@ esptool.py --chip esp32s3 --port COM3 write_flash 0x0 firmware.bin
 docker compose up -d
 ```
 
-Esto levanta:
-- **Mosquitto** en puertos 1883 (MQTT) y 9001 (WebSocket)
-- **Nginx** en puerto 80 sirviendo el dashboard y haciendo proxy de WebSocket
+Levanta:
+- **Mosquitto** en puertos `1883` (MQTT) y `9001` (WebSocket)
+- **Nginx** en puerto `80` sirviendo dashboard + proxy WebSocket
 
 Accede al dashboard en `http://localhost`.
 
 ### Firmware
 
 1. Instala [MicroPython](https://micropython.org/) en la XIAO ESP32S3
-2. Copia `firmware/config.example.py` a `firmware/config.py` y edita tus credenciales
-3. Sube los archivos a la placa:
+2. Copia `config.example.py` → `config.py` y edita credenciales
+3. Sube los archivos:
 
 ```bash
-# Con mpremote
 mpremote cp firmware/boot.py :boot.py
 mpremote cp firmware/main.py :main.py
 mpremote cp firmware/config.py :config.py
@@ -158,7 +225,7 @@ mpremote cp firmware/lib/morse.py :lib/morse.py
 mpremote cp firmware/lib/webserver.py :lib/webserver.py
 ```
 
-4. Copia `web/index.html` al filesystem del ESP32 si quieres servir el dashboard desde el dispositivo:
+4. (Opcional) Servir dashboard desde el ESP32:
 
 ```bash
 mpremote mkdir :web
@@ -169,7 +236,7 @@ mpremote cp web/index.html :web/index.html
 
 ## Tópicos MQTT
 
-Cada dispositivo publica/suscribe bajo el prefijo `d/{MAC}/` donde MAC es `AA-BB-CC-DD-EE-FF` (hyphenated).
+Prefijo: `d/{MAC}/` donde MAC = `AA-BB-CC-DD-EE-FF`
 
 | Tópico | Dirección | Descripción |
 |--------|-----------|-------------|
@@ -179,14 +246,12 @@ Cada dispositivo publica/suscribe bajo el prefijo `d/{MAC}/` donde MAC es `AA-BB
 | `d/{MAC}/device/online` | Device → Dashboard | LWT online/offline (retained) |
 | `d/{MAC}/config/set` | Dashboard → Device | Enviar nueva configuración |
 | `d/{MAC}/config/current` | Device → Dashboard | Config actual (retained) |
-| `d/{MAC}/config/ack` | Device → Dashboard | ACK de config (success/errors) |
+| `d/{MAC}/config/ack` | Device → Dashboard | ACK de config |
 | `d/{MAC}/wifi/scan` | Dashboard → Device | Solicitar escaneo WiFi |
 | `d/{MAC}/wifi/scan_results` | Device → Dashboard | Resultados del escaneo |
 | `d/{MAC}/wifi/forget` | Dashboard → Device | Borrar config.json y reiniciar |
 
-El dashboard suscribe con wildcards: `d/+/led/status`, `d/+/device/telemetry`, etc.
-
-## Comandos MQTT
+### Comandos LED
 
 Publicar en `d/{MAC}/led/cmd`:
 
@@ -195,11 +260,11 @@ Publicar en `d/{MAC}/led/cmd`:
 | `on` | Enciende el LED |
 | `off` | Apaga el LED |
 | `toggle` | Alterna on/off |
-| `breathe` | Efecto respiración cíclica |
+| `breathe` | Respiración cíclica |
 | `blink` | Parpadeo (1 Hz) |
 | `strobe` | Parpadeo rápido (10 Hz) |
 | `sos` | Patrón SOS en morse |
 | `fade_in` | Encendido gradual |
 | `fade_out` | Apagado gradual |
-| `brightness:0..100` | Ajustar brillo (porcentaje) |
-| `morse:TEXTO` | Transmitir texto en morse |
+| `brightness:0..100` | Ajustar brillo |
+| `morse:TEXTO` | Transmitir en morse |
