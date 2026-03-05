@@ -1,8 +1,11 @@
 # IoT Control Center
 
-> Last updated: 2026-03-04
+[![Release](https://img.shields.io/github/v/release/JosePavasG/LED_DASHBOARD?style=flat-square)](https://github.com/JosePavasG/LED_DASHBOARD/releases/latest)
+[![License](https://img.shields.io/github/license/JosePavasG/LED_DASHBOARD?style=flat-square)](LICENSE)
 
 Dashboard web profesional para control remoto de LEDs con efectos PWM mediante MQTT, soportando **N dispositivos ESP32** identificados por MAC. Usa **Seeed Studio XIAO ESP32S3** y un broker Mosquitto self-hosted con Docker.
+
+---
 
 ## Arquitectura
 
@@ -19,6 +22,8 @@ Dashboard web profesional para control remoto de LEDs con efectos PWM mediante M
 ```
 
 Cada dispositivo se identifica por su MAC address (`AA-BB-CC-DD-EE-FF`). El dashboard descubre dispositivos automáticamente via suscripciones wildcard (`d/+/...`).
+
+---
 
 ## Funcionalidades
 
@@ -49,8 +54,14 @@ Cada dispositivo se identifica por su MAC address (`AA-BB-CC-DD-EE-FF`). El dash
 ### Remote Settings
 - **Configuración remota** vía MQTT: WiFi, broker, timings de efectos, nombre del dispositivo
 - **Escaneo WiFi** desde el dashboard (dropdown con redes, señal, auto-fill de contraseñas guardadas)
+- **Olvidar redes WiFi** — borra credenciales del navegador y del dispositivo vía MQTT
 - **Validación y ACK** del dispositivo con feedback visual (success/error/restarting)
 - **Persistencia** en JSON en el filesystem del ESP32
+
+### WiFi Recovery
+- Si WiFi falla al boot, el firmware **borra `config.json`** automáticamente y reinicia
+- En el siguiente boot usa los valores de `config.py` (credenciales originales)
+- Permite mover el dispositivo a otra red editando solo `config.py`
 
 ### UI/UX
 - **Sidebar colapsable** con navegación por pestañas (Control / Telemetry / Logs / Settings)
@@ -62,22 +73,27 @@ Cada dispositivo se identifica por su MAC address (`AA-BB-CC-DD-EE-FF`). El dash
 - **LWT (Last Will & Testament):** detección automática de online/offline
 - **Reconexión automática** WiFi y MQTT con watchdog (40s)
 
+---
+
 ## Firmware pre-compilado
 
-En `.bin/firmware.bin` se incluye una imagen binaria lista para flashear en cualquier **Seeed XIAO ESP32S3** sin necesidad de copiar archivos individuales. Contiene el firmware MicroPython completo (v1.0.0) con todos los módulos del proyecto ya integrados.
+Descarga la imagen binaria lista para flashear desde [GitHub Releases](https://github.com/JosePavasG/LED_DASHBOARD/releases/latest):
 
 ```bash
+# Descargar
+curl -LO https://github.com/JosePavasG/LED_DASHBOARD/releases/latest/download/firmware.bin
+
 # Flashear con esptool (dirección 0x0, flash completa de 8 MB)
-esptool.py --chip esp32s3 --port COM3 write_flash 0x0 .bin/firmware.bin
+esptool.py --chip esp32s3 --port COM3 write_flash 0x0 firmware.bin
 ```
 
 > **Nota:** Después de flashear, aún necesitas crear `config.py` con tus credenciales WiFi y MQTT (ver sección Setup → Firmware).
 
+---
+
 ## Estructura del proyecto
 
 ```
-├── .bin/
-│   └── firmware.bin          # Imagen binaria pre-compilada para XIAO ESP32S3
 ├── firmware/
 │   ├── boot.py                # Boot temprano + FW_VERSION (editar aquí para releases)
 │   ├── main.py                # Firmware principal (WiFi, MQTT, LED, telemetría)
@@ -98,11 +114,17 @@ esptool.py --chip esp32s3 --port COM3 write_flash 0x0 .bin/firmware.bin
 └── .gitignore
 ```
 
+---
+
 ## Hardware
 
-- **Placa:** Seeed Studio XIAO ESP32S3
-- **LED:** Pin GPIO 21 (activo bajo)
-- **PWM:** 1000 Hz, 10-bit (0–1023)
+| Componente | Detalle |
+|------------|---------|
+| **Placa** | Seeed Studio XIAO ESP32S3 |
+| **LED** | GPIO 21 (activo bajo) |
+| **PWM** | 1000 Hz, 10-bit (0–1023) |
+
+---
 
 ## Setup
 
@@ -143,21 +165,24 @@ mpremote mkdir :web
 mpremote cp web/index.html :web/index.html
 ```
 
+---
+
 ## Tópicos MQTT
 
 Cada dispositivo publica/suscribe bajo el prefijo `d/{MAC}/` donde MAC es `AA-BB-CC-DD-EE-FF` (hyphenated).
 
-| Tópico                          | Dirección          | Descripción                       |
-|---------------------------------|--------------------|-----------------------------------|
-| `d/{MAC}/led/cmd`               | Dashboard → Device | Comandos de control               |
-| `d/{MAC}/led/status`            | Device → Dashboard | Estado JSON (retained)            |
-| `d/{MAC}/device/telemetry`      | Device → Dashboard | Telemetría periódica              |
-| `d/{MAC}/device/online`         | Device → Dashboard | LWT online/offline (retained)     |
-| `d/{MAC}/config/set`            | Dashboard → Device | Enviar nueva configuración        |
-| `d/{MAC}/config/current`        | Device → Dashboard | Config actual (retained)          |
-| `d/{MAC}/config/ack`            | Device → Dashboard | ACK de config (success/errors)    |
-| `d/{MAC}/wifi/scan`             | Dashboard → Device | Solicitar escaneo WiFi            |
-| `d/{MAC}/wifi/scan_results`     | Device → Dashboard | Resultados del escaneo            |
+| Tópico | Dirección | Descripción |
+|--------|-----------|-------------|
+| `d/{MAC}/led/cmd` | Dashboard → Device | Comandos de control |
+| `d/{MAC}/led/status` | Device → Dashboard | Estado JSON (retained) |
+| `d/{MAC}/device/telemetry` | Device → Dashboard | Telemetría periódica |
+| `d/{MAC}/device/online` | Device → Dashboard | LWT online/offline (retained) |
+| `d/{MAC}/config/set` | Dashboard → Device | Enviar nueva configuración |
+| `d/{MAC}/config/current` | Device → Dashboard | Config actual (retained) |
+| `d/{MAC}/config/ack` | Device → Dashboard | ACK de config (success/errors) |
+| `d/{MAC}/wifi/scan` | Dashboard → Device | Solicitar escaneo WiFi |
+| `d/{MAC}/wifi/scan_results` | Device → Dashboard | Resultados del escaneo |
+| `d/{MAC}/wifi/forget` | Dashboard → Device | Borrar config.json y reiniciar |
 
 El dashboard suscribe con wildcards: `d/+/led/status`, `d/+/device/telemetry`, etc.
 
@@ -165,16 +190,16 @@ El dashboard suscribe con wildcards: `d/+/led/status`, `d/+/device/telemetry`, e
 
 Publicar en `d/{MAC}/led/cmd`:
 
-| Comando              | Descripción                    |
-|----------------------|--------------------------------|
-| `on`                 | Enciende el LED                |
-| `off`                | Apaga el LED                   |
-| `toggle`             | Alterna on/off                 |
-| `breathe`            | Efecto respiración cíclica     |
-| `blink`              | Parpadeo (1 Hz)                |
-| `strobe`             | Parpadeo rápido (10 Hz)        |
-| `sos`                | Patrón SOS en morse            |
-| `fade_in`            | Encendido gradual              |
-| `fade_out`           | Apagado gradual                |
-| `brightness:0..100`  | Ajustar brillo (porcentaje)    |
-| `morse:TEXTO`        | Transmitir texto en morse      |
+| Comando | Descripción |
+|---------|-------------|
+| `on` | Enciende el LED |
+| `off` | Apaga el LED |
+| `toggle` | Alterna on/off |
+| `breathe` | Efecto respiración cíclica |
+| `blink` | Parpadeo (1 Hz) |
+| `strobe` | Parpadeo rápido (10 Hz) |
+| `sos` | Patrón SOS en morse |
+| `fade_in` | Encendido gradual |
+| `fade_out` | Apagado gradual |
+| `brightness:0..100` | Ajustar brillo (porcentaje) |
+| `morse:TEXTO` | Transmitir texto en morse |
