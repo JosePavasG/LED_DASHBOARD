@@ -77,11 +77,11 @@ Cada dispositivo se identifica por su MAC address (`AA-BB-CC-DD-EE-FF`). El dash
 
 ## Firmware pre-compilado
 
-Descarga la imagen binaria lista para flashear desde [GitHub Releases](https://github.com/JosePavasG/LED_DASHBOARD/releases/latest):
+Descarga la imagen binaria lista para flashear desde [GitHub Releases](https://github.com/JosePavasG/LED_DASHBOARD/releases/latest/download/XIAO_ESP32S3_Compilado.bin):
 
 ```bash
 # Descargar
-curl -LO https://github.com/JosePavasG/LED_DASHBOARD/releases/latest/download/firmware.bin
+curl -LO https://github.com/JosePavasG/LED_DASHBOARD/releases/latest/download/XIAO_ESP32S3_Compilado.bin
 
 # Flashear con esptool (dirección 0x0, flash completa de 8 MB)
 esptool.py --chip esp32s3 --port COM3 write_flash 0x0 firmware.bin
